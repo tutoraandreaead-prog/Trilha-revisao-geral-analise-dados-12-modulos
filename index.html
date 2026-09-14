@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trilha do Conhecimento — Aprendizagem em Análise de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #050b14;
+    --bg-panel: #0a1826;
+    --bg-panel-2: #0d2032;
+    --grid: #10283f;
+    --line-soft: #1c3c58;
+    --cyan: #2fe0ff;
+    --cyan-dim: #0d5a70;
+    --amber: #ffb347;
+    --violet: #d68bff;
+    --text-hi: #e9fbff;
+    --text-mid: #86aec5;
+    --text-dim: #4a6f89;
+    --ok: #3dffa0;
+    --bad: #ff4d6d;
+    --font-display: 'Orbitron', sans-serif;
+    --font-head: 'Chakra Petch', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% -8%, #103a52 0%, transparent 40%),
+      radial-gradient(circle at 105% 20%, #2a1140 0%, transparent 35%),
+      radial-gradient(circle at 50% 110%, #0d2a20 0%, transparent 40%),
+      var(--bg);
+    background-attachment: fixed;
+    color:var(--text-hi);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding:24px 14px 60px;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity:.35;
+    mask-image: radial-gradient(circle at 50% 0%, black 0%, transparent 75%);
+  }
+  .wrap{max-width:1000px;margin:0 auto; position:relative; z-index:1;}
+  .panel{
+    background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+    border: 1px solid var(--line-soft);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    position:relative;
+  }
+  .panel::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    box-shadow: inset 0 0 0 1px rgba(47,224,255,.06);
+  }
+
+  /* ---------- BOOT SEQUENCE ---------- */
+  .boot-overlay{
+    position:fixed; inset:0; background:#020509; z-index:200;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    transition: opacity .45s ease;
+  }
+  .boot-overlay.hide{ opacity:0; pointer-events:none; }
+  .boot-overlay::before{
+    content:""; position:absolute; inset:0;
+    background: repeating-linear-gradient(0deg, rgba(47,224,255,.035) 0px, rgba(47,224,255,.035) 1px, transparent 1px, transparent 3px);
+    animation: scan 6s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes scan{ from{ background-position-y:0; } to{ background-position-y:300px; } }
+
+  .cover-particles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .particle{
+    position:absolute; bottom:-10px; width:3px; height:3px; border-radius:50%;
+    background:var(--cyan); box-shadow:0 0 7px 1px var(--cyan);
+    opacity:0; animation-name:floatUp; animation-timing-function:linear; animation-iteration-count:infinite;
+  }
+  .particle.violet{ background:var(--violet); box-shadow:0 0 7px 1px var(--violet); }
+  .particle.amber{ background:var(--amber); box-shadow:0 0 7px 1px var(--amber); }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) scale(.6); opacity:0; }
+    12%{ opacity:.9; }
+    88%{ opacity:.5; }
+    100%{ transform:translateY(-105vh) scale(1); opacity:0; }
+  }
+
+  .boot-terminal{
+    width:100%; max-width:560px; background:#04101a; border:1px solid var(--cyan-dim);
+    border-radius:8px; padding:22px 22px 20px;
+    box-shadow: 0 0 40px -8px rgba(47,224,255,.35), inset 0 0 30px rgba(0,0,0,.5);
+    position:relative; z-index:1;
+  }
+  .boot-terminal .head{
+    display:flex; gap:6px; margin-bottom:16px;
+  }
+  .boot-terminal .head span{ width:9px; height:9px; border-radius:50%; background:#22475e; }
+
+  .boot-steps{
+    display:flex; flex-direction:column; gap:9px; min-height:200px;
+  }
+  .boot-step{
+    display:flex; align-items:center; gap:11px;
+    background:#081826; border:1px solid var(--line-soft); border-radius:22px;
+    padding:9px 16px;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-mid);
+    opacity:0; transform:translateY(10px) scale(.97);
+    transition: opacity .35s ease, transform .35s ease, border-color .3s ease, box-shadow .3s ease;
+  }
+  .boot-step.show{ opacity:1; transform:translateY(0) scale(1); }
+  .boot-step.active{
+    border-color:var(--cyan); color:var(--text-hi);
+    box-shadow:0 0 16px rgba(47,224,255,.35);
+  }
+  .boot-step.done{
+    border-color:var(--cyan-dim); color:var(--text-mid);
+  }
+  .boot-step .icon-slot{
+    width:16px; height:16px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  }
+  .boot-spin{
+    width:13px; height:13px; border-radius:50%;
+    border:2px solid rgba(47,224,255,.22); border-top-color:var(--cyan);
+    animation: spin .75s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .boot-check{
+    color:var(--ok); font-weight:700; font-size:13px;
+    text-shadow:0 0 8px rgba(61,255,160,.6);
+  }
+
+  .boot-progress{
+    margin-top:16px; height:5px; background:#04121e; border-radius:4px; overflow:hidden;
+  }
+  .boot-progress > div{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--cyan),var(--violet));
+    box-shadow:0 0 8px rgba(47,224,255,.6); transition:width .35s ease;
+  }
+  .boot-progress-label{
+    display:flex; justify-content:space-between; margin-top:7px;
+    font-family:var(--font-mono); font-size:10px; color:var(--text-dim); letter-spacing:.05em; text-transform:uppercase;
+  }
+  .boot-progress-label b{ color:var(--cyan); }
+
+  .boot-btn{
+    margin-top:16px; width:100%; font-family:var(--font-head); font-weight:700; font-size:14px; letter-spacing:.04em;
+    background:linear-gradient(90deg,var(--cyan),#7cf6ff); color:#04222c; border:none; border-radius:6px;
+    padding:12px; cursor:pointer; display:none; align-items:center; justify-content:center; gap:8px;
+    box-shadow: 0 0 22px rgba(47,224,255,.5);
+    text-transform:uppercase;
+    animation: pulseBtn 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseBtn{ 0%,100%{ box-shadow:0 0 14px rgba(47,224,255,.4);} 50%{ box-shadow:0 0 30px rgba(47,224,255,.75);} }
+
+  /* ---------- CAPA INICIAL (COVER SCREEN) ---------- */
+  .cover-panel{
+    display:none;
+    width:100%; max-width:640px; text-align:center;
+    padding:40px 30px 34px;
+    background: linear-gradient(180deg, #0a1c2c, #050e18);
+    border:1px solid var(--cyan-dim); border-radius:10px;
+    box-shadow: 0 0 60px -10px rgba(47,224,255,.4), inset 0 0 40px rgba(0,0,0,.5);
+    animation: coverIn .6s ease both;
+    position:relative; z-index:1;
+    max-height:92vh; overflow-y:auto;
+  }
+  @keyframes coverIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+  .cover-icon{ display:flex; justify-content:center; margin-bottom:14px; }
+  .cover-icon svg{ filter: drop-shadow(0 0 14px rgba(47,224,255,.55)); animation: spinPulse 8s linear infinite; transform-origin:center; }
+  @keyframes spinPulse{
+    0%{ transform:rotate(0deg) scale(1); }
+    50%{ transform:rotate(180deg) scale(1.06); }
+    100%{ transform:rotate(360deg) scale(1); }
+  }
+  .cover-eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--cyan); margin:0 0 12px;
+  }
+  .cover-title{
+    font-family:var(--font-display); font-weight:800; font-size:clamp(26px,6vw,40px);
+    line-height:1.15; margin:0 0 10px; letter-spacing:.01em;
+    background:linear-gradient(90deg,var(--text-hi),var(--cyan));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow: 0 0 30px rgba(47,224,255,.3);
+  }
+  .cover-subtitle{
+    font-family:var(--font-head); font-weight:600; font-size:14px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--amber); margin:0 0 16px;
+  }
+  .cover-hook{
+    font-family:var(--font-body); font-size:13.5px; color:var(--text-mid); line-height:1.6;
+    max-width:440px; margin:0 auto 24px;
+  }
+  .cover-hook b{ color:var(--text-hi); }
+
+  .cover-ranks{
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    gap:6px; margin-bottom:26px; font-family:var(--font-mono);
+  }
+  .cover-ranks .rk{
+    font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-dim);
+    border:1px solid var(--line-soft); border-radius:20px; padding:5px 10px;
+  }
+  .cover-ranks .rk.active{
+    color:var(--amber); border-color:var(--amber); box-shadow:0 0 10px rgba(255,179,71,.4);
+  }
+  .cover-ranks .rk-sep{ color:var(--text-dim); font-size:11px; }
+
+  .cover-tracks{
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px;
+  }
+  .ct{
+    flex:1; min-width:140px; max-width:180px;
+    background:#081a29; border:1px solid var(--line-soft); border-left:3px solid var(--c);
+    border-radius:6px; padding:10px 12px; text-align:left;
+  }
+  .ct b{ font-family:var(--font-display); font-size:20px; color:var(--text-hi); display:block; }
+  .ct span{ font-family:var(--font-mono); font-size:9.5px; color:var(--text-mid); text-transform:uppercase; letter-spacing:.03em; line-height:1.4; display:block; margin-top:2px; }
+
+  .cover-stats{
+    display:none;
+  }
+  .cover-btn{
+    width:100%; font-family:var(--font-head); font-weight:700; font-size:16px; letter-spacing:.04em;
+    background:linear-gradient(90deg,var(--cyan),#7cf6ff); color:#04222c; border:none; border-radius:6px;
+    padding:15px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow: 0 0 24px rgba(47,224,255,.5);
+    text-transform:uppercase;
+    animation: pulseBtn 1.6s ease-in-out infinite;
+  }
+  .cover-btn:hover{ filter:brightness(1.08); }
+
+  .cover-name{ text-align:left; margin-bottom:18px; }
+  .cover-name label{
+    display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--text-mid); margin-bottom:7px;
+  }
+  .cover-name input{
+    width:100%; background:#081826; border:1px solid var(--line-soft); border-radius:6px;
+    padding:12px 14px; color:var(--text-hi); font-family:var(--font-body); font-size:14.5px;
+    outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .cover-name input::placeholder{ color:var(--text-dim); }
+  .cover-name input:focus{ border-color:var(--cyan); box-shadow:0 0 14px rgba(47,224,255,.3); }
+  .cover-name input.input-error{ border-color:var(--bad); box-shadow:0 0 14px rgba(255,77,109,.35); animation:glitch .35s linear; }
+  .name-error{
+    display:none; color:var(--bad); font-family:var(--font-mono); font-size:11px; margin-top:7px;
+  }
+  .cover-fine{
+    font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim); margin-top:12px; letter-spacing:.03em;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:20px;
+    flex-wrap:wrap; margin-bottom:22px; padding-bottom:20px; border-bottom:1px solid var(--line-soft);
+  }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--cyan); margin:0 0 8px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .pip{ width:6px; height:6px; background:var(--ok); border-radius:50%; box-shadow:0 0 8px var(--ok); animation: blinkSoft 1.6s ease-in-out infinite; }
+  @keyframes blinkSoft{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  h1{
+    font-family:var(--font-display); font-weight:800; font-size:clamp(28px,5vw,42px);
+    margin:0 0 8px; line-height:1; letter-spacing:.02em;
+    background:linear-gradient(90deg,var(--text-hi),var(--cyan));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow: 0 0 30px rgba(47,224,255,.25);
+  }
+  header p.tagline{margin:0; color:var(--text-mid); font-size:14px; max-width:540px; font-family:var(--font-head); line-height:1.5;}
+  .course-chip{
+    font-family:var(--font-mono); font-size:11.5px; color:var(--text-mid);
+    padding:14px 18px; min-width:220px;
+  }
+  .course-chip .rank-line{ display:flex; justify-content:space-between; margin-bottom:8px; padding-bottom:8px; border-bottom:1px dashed var(--line-soft); }
+  .course-chip .rank-badge{ font-family:var(--font-head); font-weight:700; color:var(--amber); text-transform:uppercase; font-size:12px; }
+  .course-chip div.row{margin-bottom:4px;}
+  .course-chip b{color:var(--text-hi); font-weight:600;}
+
+  .cert-name{ font-family:var(--font-head); font-size:15px; color:var(--text-mid); margin:0 0 6px; }
+  .cert-name b{ color:var(--text-hi); }
+  .cert-date{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin:14px 0 0; letter-spacing:.04em; }
+  .cert-encourage{
+    font-family:var(--font-head); font-size:14px; color:var(--cyan); margin:18px auto 0; max-width:420px;
+    line-height:1.6; font-weight:600;
+  }
+  .cert-badges{ display:flex; justify-content:center; gap:18px; margin:16px 0 4px; font-family:var(--font-mono); font-size:12px; color:var(--text-mid); }
+  .cert-badges span{ display:flex; align-items:center; gap:6px; }
+
+  /* ---------- HUD / SCOREBOARD ---------- */
+  .scoreboard{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+
+  .rewards-panel{ padding:14px 16px; margin-bottom:18px; }
+  .rewards-title{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:12px;
+  }
+  .rewards-strip{ display:flex; gap:8px; flex-wrap:wrap; }
+  .reward-slot{
+    width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; background:#081826; border:1px solid var(--line-soft); position:relative;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .reward-slot.locked{ color:var(--text-dim); opacity:.5; }
+  .reward-slot.earned{ animation:rewardPop .4s ease; }
+  .reward-slot.tier-ouro{ border-color:#ffd447; box-shadow:0 0 14px rgba(255,212,71,.5); }
+  .reward-slot.tier-prata{ border-color:#c9d6e3; box-shadow:0 0 12px rgba(201,214,227,.4); }
+  .reward-slot.tier-bronze{ border-color:#d98b4a; box-shadow:0 0 12px rgba(217,139,74,.4); }
+  .reward-slot.tier-participacao{ border-color:var(--cyan); box-shadow:0 0 10px rgba(47,224,255,.35); }
+  @keyframes rewardPop{ 0%{ transform:scale(.4); opacity:0; } 60%{ transform:scale(1.15); opacity:1; } 100%{ transform:scale(1); } }
+  .stat{ flex:1; min-width:130px; padding:12px 16px; }
+  .stat .label{ font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim);}
+  .stat .value{ font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--cyan); margin-top:3px; text-shadow:0 0 14px rgba(47,224,255,.4);}
+  .stat.streak .value{ color:var(--amber); text-shadow:0 0 14px rgba(255,179,71,.5); }
+  .progressbar{ width:100%; height:5px; background:#04121e; border-radius:3px; overflow:hidden; margin-top:9px; }
+  .progressbar > div{ height:100%; background:linear-gradient(90deg,var(--cyan),var(--violet)); width:0%; transition:width .5s ease; box-shadow:0 0 8px rgba(47,224,255,.6);}
+
+  .note{
+    font-size:12px; color:var(--text-mid); margin-bottom:18px; line-height:1.6;
+    padding:11px 16px; font-family:var(--font-mono);
+    border-left:2px solid var(--cyan);
+  }
+  .note b{color:var(--cyan);}
+
+  .legend{ display:flex; gap:20px; flex-wrap:wrap; margin-bottom:16px; font-size:11.5px; color:var(--text-mid); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.03em;}
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .dot{ width:9px; height:9px; display:inline-block; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+
+  /* ---------- BOARD ---------- */
+  .board-shell{ padding:26px 8px; margin-bottom:24px; overflow:hidden; }
+  svg#board{ display:block; width:100%; height:auto; }
+  .trace{ fill:none; stroke:var(--line-soft); stroke-width:4; stroke-linecap:round; }
+  .trace-done{ fill:none; stroke:var(--cyan); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset .6s ease; filter:url(#neonGlow); }
+
+  .node-group{ cursor:pointer; }
+  .node-group.locked{ cursor:not-allowed; }
+  .node-hex{ stroke-width:2.5; transition:all .2s ease; }
+  .node-group:not(.locked) .node-hex.done, .node-group:not(.locked) .node-hex.unlocked{ filter:url(#neonGlow); }
+  .node-label{ font-family:var(--font-head); font-weight:600; fill:var(--text-hi); font-size:12px; pointer-events:none; }
+  .node-sub{ font-family:var(--font-mono); font-size:9.5px; fill:var(--text-dim); pointer-events:none; }
+  .node-num{ font-family:var(--font-mono); font-weight:700; font-size:15px; pointer-events:none; }
+  .node-group:not(.locked):hover .node-hex{ filter: url(#neonGlowStrong); }
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(2,7,13,.86); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:16px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+    border: 1px solid var(--cyan-dim);
+    clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    max-width:540px; width:100%; padding:28px 26px 22px; position:relative;
+    box-shadow: 0 0 50px -10px rgba(47,224,255,.3), 0 20px 60px -20px #000c;
+    max-height:88vh; overflow-y:auto;
+  }
+  .modal::before{
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background: repeating-linear-gradient(0deg, rgba(47,224,255,.02) 0px, rgba(47,224,255,.02) 1px, transparent 1px, transparent 3px);
+  }
+  .modal .m-eyebrow{ font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px;}
+  .modal h2{ font-family:var(--font-head); font-weight:700; font-size:19px; margin:0 0 4px; line-height:1.3;}
+  .qcount{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:18px;}
+  .options{ display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .opt{
+    text-align:left; background:#081a29; border:1px solid var(--line-soft); color:var(--text-hi);
+    padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:14.5px;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .opt:hover:not(:disabled){ border-color:var(--cyan); box-shadow:0 0 12px rgba(47,224,255,.25); }
+  .opt.correct{ background:#0a3626; border-color:var(--ok); color:var(--ok); box-shadow:0 0 14px rgba(61,255,160,.3); }
+  .opt.wrong{ background:#3a0e1a; border-color:var(--bad); color:var(--bad); animation: glitch .35s linear; }
+  @keyframes glitch{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-4px);} 40%{transform:translateX(4px);} 60%{transform:translateX(-3px);} 80%{transform:translateX(3px);} }
+  .opt:disabled{ cursor:default; }
+  .feedback{ font-size:13.5px; color:var(--text-mid); margin-bottom:16px; min-height:18px; line-height:1.5; font-family:var(--font-body);}
+  .modal-actions{ display:flex; justify-content:flex-end; }
+  .btn{
+    font-family:var(--font-head); font-weight:700; font-size:13.5px; text-transform:uppercase; letter-spacing:.03em;
+    background:linear-gradient(90deg,var(--cyan),#7cf6ff); color:#04222c; border:none; border-radius:6px;
+    padding:11px 22px; cursor:pointer; transition:filter .15s;
+    box-shadow:0 0 16px rgba(47,224,255,.4);
+  }
+  .btn:hover{ filter:brightness(1.1); }
+  .btn:disabled{ opacity:.3; cursor:not-allowed; box-shadow:none; }
+  .close-x{ position:absolute; top:14px; right:16px; background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; font-family:var(--font-mono); }
+
+  .complete-card{ text-align:center; padding:6px 0 4px; }
+  .complete-card .icon{ font-size:40px; margin-bottom:10px; filter:drop-shadow(0 0 10px rgba(47,224,255,.6)); }
+  .complete-card h2{ margin-bottom:6px; font-family:var(--font-display); }
+  .complete-card p{ color:var(--text-mid); font-size:13.5px; margin-bottom:20px; font-family:var(--font-mono);}
+
+  #finalCard{ display:none; }
+  #finalCard.show{ display:block; }
+  .certificate{ padding:38px 26px; text-align:center; border:1px solid var(--cyan-dim); box-shadow:0 0 60px -15px rgba(47,224,255,.35); }
+  .certificate .status-line{ font-family:var(--font-mono); font-size:11px; color:var(--ok); letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px;}
+  .certificate .rank{ font-family:var(--font-display); font-size:28px; color:var(--amber); margin:10px 0; text-shadow:0 0 20px rgba(255,179,71,.4);}
+  .certificate .score-big{ font-family:var(--font-mono); font-size:46px; font-weight:700; color:var(--text-hi); text-shadow:0 0 24px rgba(47,224,255,.4);}
+  .certificate p{ color:var(--text-mid); max-width:460px; margin:16px auto 0; font-size:14px; line-height:1.7; font-family:var(--font-body);}
+  .restart{ margin-top:24px; }
+
+  footer{ text-align:center; color:var(--text-dim); font-size:11px; margin-top:32px; font-family:var(--font-mono); letter-spacing:.05em;}
+
+  @media (max-width:640px){
+    .course-chip{width:100%;}
+    header{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="boot-overlay" id="bootOverlay">
+  <div class="cover-particles" id="coverParticles"></div>
+
+  <div class="boot-terminal" id="bootTerminal">
+    <div class="head"><span></span><span></span><span></span></div>
+    <div class="boot-steps" id="bootSteps"></div>
+    <div class="boot-progress"><div id="bootProgressBar"></div></div>
+    <div class="boot-progress-label"><span>Carregando missão</span><b id="bootProgressPct">0%</b></div>
+    <button class="boot-btn" id="bootEnter" onclick="showCover()">▶ Continuar</button>
+  </div>
+
+  <div class="cover-panel" id="coverPanel">
+    <div class="cover-icon">
+      <svg width="72" height="72" viewBox="0 0 72 72">
+        <polygon points="36,3 66,19.5 66,52.5 36,69 6,52.5 6,19.5" fill="none" stroke="#2fe0ff" stroke-width="2.5"/>
+        <polygon points="36,17 54,27 54,47 36,57 18,47 18,27" fill="none" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <circle cx="36" cy="36" r="5" fill="#2fe0ff"/>
+        <line x1="36" y1="17" x2="36" y2="3" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <line x1="18" y1="27" x2="6" y2="19.5" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <line x1="54" y1="27" x2="66" y2="19.5" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <line x1="18" y1="47" x2="6" y2="52.5" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <line x1="54" y1="47" x2="66" y2="52.5" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+        <line x1="36" y1="57" x2="36" y2="69" stroke="#2fe0ff" stroke-width="1.5" opacity=".6"/>
+      </svg>
+    </div>
+    <p class="cover-eyebrow">SENAI · Programa de Aprendizagem</p>
+    <h1 class="cover-title">TRILHA DO<br>CONHECIMENTO</h1>
+    <p class="cover-subtitle">Aprendizagem em Análise de Dados</p>
+    <p class="cover-hook">12 estações. 400 perguntas no banco de dados. Uma trilha de <b>revisão geral</b> para você dominar os fundamentos de Análise de Dados. Bora ver até onde sua patente chega?</p>
+
+    <div class="cover-ranks">
+      <span class="rk active">Recruta</span><span class="rk-sep">→</span>
+      <span class="rk">Operador Jr.</span><span class="rk-sep">→</span>
+      <span class="rk">Analista Jr.</span><span class="rk-sep">→</span>
+      <span class="rk">Pleno</span><span class="rk-sep">→</span>
+      <span class="rk">Sênior</span>
+    </div>
+
+    <div class="cover-tracks">
+      <div class="ct" style="--c:#2fe0ff"><b>6</b><span>Educação para o Trabalho</span></div>
+      <div class="ct" style="--c:#ffb347"><b>2</b><span>Operador de Computador</span></div>
+      <div class="ct" style="--c:#d68bff"><b>4</b><span>Assistente de Análise de Dados</span></div>
+    </div>
+
+    <div class="cover-name">
+      <label for="playerNameInput">Identifique-se para iniciar a missão</label>
+      <input type="text" id="playerNameInput" placeholder="Digite seu nome completo" maxlength="60" autocomplete="off" oninput="clearNameError()" onkeydown="if(event.key==='Enter'){ startMission(); }">
+      <div class="name-error" id="nameError">Digite seu nome para continuar.</div>
+    </div>
+
+    <button class="cover-btn" onclick="startMission()">▶ Entrar na Trilha</button>
+    <p class="cover-fine">Sem cadastro · Sem instalar nada · 100% offline</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow"><span class="pip"></span>SENAI // SISTEMA DE TREINAMENTO ATIVO</p>
+      <h1>TRILHA DO CONHECIMENTO</h1>
+      <p class="tagline">Revisão geral de Aprendizagem em Análise de Dados. Complete os 12 módulos da trilha, acumule XP e revise os fundamentos essenciais do curso. Cada estação é um checkpoint — erre pouco, avance rápido.</p>
+    </div>
+    <div class="panel course-chip">
+      <div class="rank-line">
+        <span>PATENTE ATUAL</span>
+        <span class="rank-badge" id="rankBadge">RECRUTA</span>
+      </div>
+      <div class="row"><b>Aluno:</b> <span id="playerNameDisplay">—</span></div>
+      <div class="row"><b>Curso:</b> Assistente em Análise de Dados</div>
+      <div class="row"><b>Carga SENAI:</b> 480h</div>
+      <div class="row"><b>Módulos:</b> 12 · Nível 3</div>
+    </div>
+  </header>
+
+  <div class="scoreboard">
+    <div class="panel stat">
+      <div class="label">Checkpoints</div>
+      <div class="value" id="statNodes">0 / 12</div>
+      <div class="progressbar"><div id="barNodes"></div></div>
+    </div>
+    <div class="panel stat">
+      <div class="label">Acertos (XP)</div>
+      <div class="value" id="statScore">0 / 0</div>
+      <div class="progressbar"><div id="barScore"></div></div>
+    </div>
+    <div class="panel stat streak">
+      <div class="label">Combo atual</div>
+      <div class="value" id="statStreak">0 🔥</div>
+    </div>
+  </div>
+
+  <div class="panel note"><b>// PROTOCOLO:</b> cada módulo tem um banco de 33-34 perguntas. A cada execução, 20 são sorteadas por estação — complete cada uma para ganhar sua recompensa. Rode de novo pra pegar um set novo.</div>
+
+  <div class="panel rewards-panel">
+    <div class="rewards-title">🏅 SUAS RECOMPENSAS</div>
+    <div class="rewards-strip" id="rewardsStrip"></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--cyan); box-shadow:0 0 6px var(--cyan);"></span> Educação p/ Trabalho</span>
+    <span><span class="dot" style="background:var(--amber); box-shadow:0 0 6px var(--amber);"></span> Operador de Computador</span>
+    <span><span class="dot" style="background:var(--violet); box-shadow:0 0 6px var(--violet);"></span> Assistente de Análise de Dados</span>
+  </div>
+
+  <div class="panel board-shell">
+    <svg id="board" viewBox="0 0 860 900" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div id="finalCard">
+    <div class="panel certificate">
+      <div class="status-line">✔ CERTIFICADO DE PARTICIPAÇÃO — TRILHA COMPLETA</div>
+      <p class="cert-name">Emitido para: <b id="certPlayerName">—</b></p>
+      <div class="score-big" id="finalScore">0/0</div>
+      <div class="rank" id="finalRank">—</div>
+      <p id="finalText"></p>
+      <div class="cert-badges" id="certBadges"></div>
+      <p class="cert-encourage" id="certEncourage"></p>
+      <p class="cert-date" id="certDate"></p>
+      <div class="restart"><button class="btn" onclick="resetGame()">↻ Rodar de novo (novo set de perguntas)</button></div>
+    </div>
+  </div>
+
+  <footer>PROGRAMA DE APRENDIZAGEM INDUSTRIAL BÁSICA · ASSISTENTE EM ANÁLISE DE DADOS · SENAI</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const TRACKS = {
+  edu:   { hex:'#2fe0ff', label:'Educação para o Trabalho' },
+  op:    { hex:'#ffb347', label:'Operador de Computador' },
+  esp:   { hex:'#d68bff', label:'Assistente de Análise de Dados' },
+};
+const QUESTIONS_PER_SESSION = 20; // 20 perguntas sorteadas por módulo, do banco de 33-34 cada
+const RANKS = ['RECRUTA','OPERADOR JR.','ANALISTA JR.','ANALISTA PLENO','ANALISTA SÊNIOR'];
+
+const MODULE_BANK = [{"id": 1, "track": "edu", "name": "Fundamentos da Comunicação e Informação", "hours": 20, "questions": [{"q": "Qual elemento NÃO faz parte do processo de comunicação?", "opts": ["Emissor", "Mensagem", "Algoritmo de compilação"], "correct": 2, "exp": "Comunicação envolve emissor, mensagem, canal e receptor, não um algoritmo de compilação."}, {"q": "Escuta ativa significa, principalmente:", "opts": ["Repetir tudo o que a pessoa disse, palavra por palavra", "Prestar atenção genuína e confirmar o entendimento", "Esperar a vez de falar sem realmente ouvir"], "correct": 1, "exp": "Escuta ativa é prestar atenção real à mensagem e confirmar o entendimento."}, {"q": "O 'ruído' na comunicação refere-se a:", "opts": ["Qualquer interferência que atrapalha a mensagem", "O volume da voz do emissor", "O tom de voz usado"], "correct": 0, "exp": "Ruído é qualquer interferência (física, semântica ou psicológica) que atrapalha a transmissão da mensagem."}, {"q": "A comunicação não verbal inclui:", "opts": ["Apenas palavras escritas", "Gestos, expressões faciais e postura", "Apenas o volume da voz"], "correct": 1, "exp": "Comunicação não verbal envolve gestos, expressões faciais, postura e tom, além das palavras."}, {"q": "O feedback na comunicação serve para:", "opts": ["Confirmar se a mensagem foi compreendida", "Encerrar a conversa rapidamente", "Evitar que o receptor responda"], "correct": 0, "exp": "O feedback confirma ao emissor se a mensagem foi entendida como pretendido."}, {"q": "Em um e-mail profissional, é recomendado:", "opts": ["Usar linguagem informal excessiva", "Ser claro, objetivo e educado", "Deixar o campo 'assunto' vazio"], "correct": 1, "exp": "E-mails profissionais devem ser claros, objetivos e educados."}, {"q": "O canal de comunicação é:", "opts": ["O meio pelo qual a mensagem é transmitida", "A pessoa que envia a mensagem", "O código utilizado na mensagem"], "correct": 0, "exp": "Canal é o meio (voz, e-mail, escrita) por onde a mensagem trafega do emissor ao receptor."}, {"q": "Comunicação assertiva é:", "opts": ["Impor opiniões sem ouvir o outro", "Expressar-se com clareza e respeito, sem agressividade", "Evitar expressar qualquer opinião"], "correct": 1, "exp": "Assertividade é expressar ideias com clareza e respeito, sem passividade ou agressividade."}, {"q": "Um dos principais objetivos da gestão da informação é:", "opts": ["Acumular dados sem organização", "Garantir que a informação certa chegue à pessoa certa no momento certo", "Restringir o acesso à informação para todos"], "correct": 1, "exp": "Gestão da informação busca disponibilizar a informação certa, no momento certo, para quem precisa dela."}, {"q": "Dado, informação e conhecimento diferem porque:", "opts": ["São sinônimos e podem ser usados da mesma forma", "Dado é bruto, informação é dado com contexto, conhecimento é a aplicação da informação", "Conhecimento é sempre menor que o dado"], "correct": 1, "exp": "Dado é bruto, informação é o dado contextualizado, e conhecimento é a aplicação prática dessa informação."}, {"q": "Qual é um exemplo de comunicação formal no trabalho?", "opts": ["Uma conversa de corredor", "Um memorando oficial", "Uma piada entre colegas"], "correct": 1, "exp": "Um memorando oficial segue um padrão formal de comunicação organizacional."}, {"q": "Um dos maiores erros de comunicação em equipes é:", "opts": ["Excesso de clareza", "Falta de feedback e alinhamento", "Documentar decisões importantes"], "correct": 1, "exp": "A falta de feedback e alinhamento gera ruídos e retrabalho nas equipes."}, {"q": "Em uma reunião, a pauta serve para:", "opts": ["Organizar os assuntos a serem tratados", "Decorar o ambiente", "Substituir a ata da reunião"], "correct": 0, "exp": "A pauta organiza previamente os assuntos que serão discutidos na reunião."}, {"q": "A 'escuta empática' envolve:", "opts": ["Julgar rapidamente o que a pessoa está dizendo", "Tentar compreender o sentimento e a perspectiva do outro", "Interromper para dar sua opinião"], "correct": 1, "exp": "Escuta empática busca compreender o sentimento e o ponto de vista de quem fala."}, {"q": "Redigir um relatório técnico exige, principalmente:", "opts": ["Linguagem rebuscada e informal", "Objetividade, clareza e dados verificáveis", "Opiniões pessoais sem fundamentação"], "correct": 1, "exp": "Relatórios técnicos devem ser objetivos, claros e baseados em dados verificáveis."}, {"q": "O que caracteriza uma comunicação eficaz?", "opts": ["A mensagem é compreendida da forma pretendida pelo emissor", "O uso de muitas palavras técnicas", "O silêncio total do receptor"], "correct": 0, "exp": "Comunicação eficaz é aquela em que a mensagem é entendida como o emissor pretendia."}, {"q": "Em ambientes corporativos, o WhatsApp é geralmente considerado um canal:", "opts": ["Totalmente formal e institucional", "Informal, que exige atenção ao tom e ao conteúdo", "Proibido em qualquer empresa"], "correct": 1, "exp": "O WhatsApp corporativo costuma ser mais informal, mas exige cuidado com tom e conteúdo."}, {"q": "Barreiras na comunicação podem ser:", "opts": ["Físicas, semânticas e psicológicas", "Apenas físicas", "Inexistentes em ambientes profissionais"], "correct": 0, "exp": "As barreiras de comunicação podem ser físicas, semânticas (de significado) ou psicológicas."}, {"q": "Uma boa prática ao repassar informações da empresa é:", "opts": ["Alterar dados para parecer mais interessante", "Verificar a fonte e a veracidade antes de repassar", "Repassar tudo sem checar"], "correct": 1, "exp": "É importante verificar a fonte e a veracidade da informação antes de repassá-la."}, {"q": "O que é 'empatia comunicacional'?", "opts": ["Falar mais alto que o outro", "Colocar-se no lugar do interlocutor ao se comunicar", "Ignorar as reações do interlocutor"], "correct": 1, "exp": "Empatia comunicacional é considerar a perspectiva e os sentimentos de quem está ouvindo."}, {"q": "Documentos institucionais devem seguir:", "opts": ["Padrões e normas da organização", "O estilo pessoal de cada colaborador", "Nenhuma regra específica"], "correct": 0, "exp": "Documentos institucionais seguem padrões e normas definidos pela organização."}, {"q": "Comunicação vertical descendente ocorre:", "opts": ["Entre colegas do mesmo nível", "De um superior para um subordinado", "Apenas fora da empresa"], "correct": 1, "exp": "Comunicação vertical descendente flui de níveis hierárquicos superiores para inferiores."}, {"q": "Comunicação horizontal ocorre:", "opts": ["Entre pessoas de mesmo nível hierárquico", "Apenas entre diretores", "Apenas por e-mail"], "correct": 0, "exp": "Comunicação horizontal acontece entre pessoas do mesmo nível hierárquico."}, {"q": "Ao dar uma instrução de trabalho, é importante:", "opts": ["Ser vago para dar liberdade total", "Ser claro sobre o que, como e quando deve ser feito", "Evitar confirmar o entendimento"], "correct": 1, "exp": "Instruções claras sobre o que, como e quando reduzem erros e retrabalho."}, {"q": "A leitura crítica de uma notícia envolve:", "opts": ["Aceitar tudo que está escrito sem questionar", "Verificar fonte, data e possíveis vieses", "Compartilhar imediatamente sem checar"], "correct": 1, "exp": "Leitura crítica envolve checar fonte, data e possíveis vieses antes de aceitar a informação."}, {"q": "Um dos pilares da comunicação organizacional eficiente é:", "opts": ["Transparência", "Ambiguidade proposital", "Excesso de informações irrelevantes"], "correct": 0, "exp": "Transparência é um pilar essencial da comunicação organizacional eficiente."}, {"q": "Ao se comunicar com um público diverso, deve-se:", "opts": ["Usar sempre o mesmo vocabulário técnico", "Adaptar a linguagem ao público-alvo", "Ignorar as diferenças de conhecimento do público"], "correct": 1, "exp": "A linguagem deve ser adaptada ao nível de conhecimento e ao perfil do público."}, {"q": "Um bom título de e-mail deve:", "opts": ["Ser vago e genérico", "Resumir claramente o assunto tratado", "Conter apenas emojis"], "correct": 1, "exp": "O título do e-mail deve resumir claramente o assunto para facilitar a leitura."}, {"q": "Comunicação escrita eficiente evita:", "opts": ["Frases curtas e diretas", "Parágrafos longos e confusos", "O uso de tópicos"], "correct": 1, "exp": "Comunicação escrita eficiente evita parágrafos longos e confusos, preferindo objetividade."}, {"q": "Ruído semântico ocorre quando:", "opts": ["Há barulho externo impedindo a escuta", "Palavras ou termos são mal compreendidos por ambiguidade", "O emissor fala muito rápido"], "correct": 1, "exp": "Ruído semântico acontece quando o significado das palavras é mal interpretado."}, {"q": "A redundância controlada em uma comunicação (repetir a ideia de formas diferentes) serve, principalmente, para:", "opts": ["Reforçar a compreensão da mensagem pelo receptor", "Confundir propositalmente o receptor", "Substituir a necessidade de um canal adequado"], "correct": 0, "exp": "Redundância controlada reforça a compreensão, reduzindo a chance de a mensagem ser mal interpretada."}, {"q": "Um relatório gerencial eficaz deve priorizar, principalmente:", "opts": ["Informações relevantes e objetivas para a tomada de decisão", "O maior número possível de dados, sem qualquer filtro", "Uma linguagem rebuscada e pouco acessível"], "correct": 0, "exp": "Relatórios gerenciais eficazes filtram e priorizam as informações mais relevantes para decisões rápidas."}, {"q": "A curva do esquecimento sugere que a retenção de uma informação tende a:", "opts": ["Diminuir rapidamente com o tempo, sem reforço", "Aumentar automaticamente com o passar dos dias", "Permanecer sempre constante, independente de reforço"], "correct": 0, "exp": "A curva do esquecimento mostra que, sem reforço, a retenção de informações cai rapidamente após o aprendizado."}]}, {"id": 2, "track": "edu", "name": "Relações Socioprofissionais, Cidadania e Ética", "hours": 20, "questions": [{"q": "No ambiente de trabalho, agir com ética significa:", "opts": ["Levar vantagem sempre que possível", "Respeitar acordos, colegas e informações confidenciais", "Seguir as regras apenas quando alguém está observando"], "correct": 1, "exp": "Ética profissional é agir com integridade constante, respeitando acordos, colegas e sigilo."}, {"q": "Cidadania organizacional inclui, entre outras atitudes:", "opts": ["Colaborar e contribuir além do estritamente exigido", "Competir de forma desleal com os colegas", "Ignorar os problemas da equipe"], "correct": 0, "exp": "Cidadania organizacional envolve atitudes voluntárias que beneficiam a equipe além do mínimo exigido."}, {"q": "A diversidade no ambiente de trabalho deve ser:", "opts": ["Ignorada para manter a rotina", "Respeitada e valorizada", "Motivo de exclusão de grupos minoritários"], "correct": 1, "exp": "A diversidade deve ser respeitada e valorizada como fonte de riqueza para as equipes."}, {"q": "Um comportamento antiético comum no trabalho é:", "opts": ["Reconhecer o mérito dos colegas", "Apropriar-se de ideias de colegas sem dar crédito", "Cumprir prazos combinados"], "correct": 1, "exp": "Apropriar-se de ideias alheias sem crédito é uma atitude antiética comum."}, {"q": "O assédio moral no trabalho caracteriza-se por:", "opts": ["Elogios frequentes e respeitosos", "Humilhação e constrangimento repetidos", "Feedback construtivo ocasional"], "correct": 1, "exp": "Assédio moral envolve humilhação, constrangimento e desrespeito repetidos contra uma pessoa."}, {"q": "Respeitar a hierarquia no trabalho significa:", "opts": ["Seguir os canais adequados de comunicação e decisão", "Obedecer cegamente sem poder opinar", "Ignorar orientações de superiores"], "correct": 0, "exp": "Respeitar a hierarquia é seguir os canais apropriados de comunicação e decisão."}, {"q": "O trabalho em equipe eficaz depende de:", "opts": ["Cooperação e respeito mútuo", "Competição interna constante", "Isolamento entre os membros"], "correct": 0, "exp": "Trabalho em equipe eficaz depende de cooperação, respeito e comunicação entre os membros."}, {"q": "O código de conduta de uma empresa serve para:", "opts": ["Orientar os comportamentos esperados dos colaboradores", "Punir colaboradores sem justificativa", "Substituir a legislação trabalhista"], "correct": 0, "exp": "O código de conduta orienta quais comportamentos são esperados dentro da organização."}, {"q": "Conflito de interesses ocorre quando:", "opts": ["Interesses pessoais colidem com os da empresa", "Um colaborador concorda com todas as decisões", "Não há nenhuma divergência de opinião"], "correct": 0, "exp": "Conflito de interesses acontece quando interesses pessoais entram em choque com os da organização."}, {"q": "Inclusão social no trabalho significa:", "opts": ["Garantir oportunidades iguais a todas as pessoas", "Priorizar apenas um grupo específico", "Ignorar as necessidades de pessoas com deficiência"], "correct": 0, "exp": "Inclusão social busca garantir oportunidades iguais, independentemente de diferenças."}, {"q": "Um dos direitos trabalhistas básicos é:", "opts": ["Descanso semanal remunerado", "Trabalho sem qualquer limite de jornada", "Ausência de férias remuneradas"], "correct": 0, "exp": "O descanso semanal remunerado é um direito trabalhista básico garantido por lei."}, {"q": "A responsabilidade social empresarial envolve:", "opts": ["Impacto positivo na sociedade e no meio ambiente", "Foco exclusivo no lucro, sem outras considerações", "Desrespeito às leis ambientais"], "correct": 0, "exp": "Responsabilidade social empresarial busca gerar impacto positivo social e ambiental."}, {"q": "O sigilo profissional exige:", "opts": ["Divulgar informações confidenciais quando conveniente", "Não divulgar informações confidenciais da empresa ou de clientes", "Compartilhar dados sensíveis em redes sociais"], "correct": 1, "exp": "Sigilo profissional exige proteger informações confidenciais da empresa e de clientes."}, {"q": "A postura profissional inclui:", "opts": ["Pontualidade e compromisso com prazos", "Atrasos frequentes sem justificativa", "Descumprimento constante de combinados"], "correct": 0, "exp": "Postura profissional envolve pontualidade e comprometimento com prazos e combinados."}, {"q": "Discriminação no trabalho é:", "opts": ["Tratar todos com igualdade de oportunidades", "Tratar alguém de forma desigual por preconceito", "Reconhecer méritos individuais"], "correct": 1, "exp": "Discriminação é tratar alguém de forma desigual com base em preconceito."}, {"q": "Cidadania implica:", "opts": ["Exercer direitos e cumprir deveres na sociedade", "Apenas cobrar direitos sem cumprir deveres", "Ignorar as regras da coletividade"], "correct": 0, "exp": "Cidadania envolve tanto o exercício de direitos quanto o cumprimento de deveres."}, {"q": "Um ambiente de trabalho ético favorece:", "opts": ["Confiança entre colegas e empresa", "Desconfiança generalizada", "Competição desleal constante"], "correct": 0, "exp": "Um ambiente ético fortalece a confiança entre colaboradores e a organização."}, {"q": "Sobre o assédio sexual no trabalho, é correto afirmar que:", "opts": ["É aceitável se for 'brincadeira'", "É crime e deve ser denunciado", "Só é grave se for físico"], "correct": 1, "exp": "Assédio sexual é crime e deve ser denunciado pelos canais apropriados."}, {"q": "A diversidade de gênero e raça no ambiente corporativo:", "opts": ["Enriquece as perspectivas e decisões", "Deve ser evitada para manter a homogeneidade", "Não traz nenhum benefício às equipes"], "correct": 0, "exp": "A diversidade traz diferentes perspectivas que enriquecem as decisões organizacionais."}, {"q": "Comportamento proativo é:", "opts": ["Antecipar-se aos problemas e agir sem esperar ordens", "Esperar sempre por instruções detalhadas", "Evitar tomar qualquer iniciativa"], "correct": 0, "exp": "Proatividade é antecipar problemas e agir com iniciativa, sem depender de ordens."}, {"q": "Ao presenciar uma injustiça no trabalho, o correto é:", "opts": ["Ignorar a situação", "Reportar aos canais apropriados", "Divulgar publicamente sem verificar os fatos"], "correct": 1, "exp": "Situações de injustiça devem ser reportadas pelos canais internos apropriados."}, {"q": "A ética profissional se aplica:", "opts": ["Apenas quando há supervisão direta", "Em todas as situações, mesmo sem supervisão", "Somente em reuniões formais"], "correct": 1, "exp": "Ética profissional deve ser praticada de forma constante, com ou sem supervisão."}, {"q": "Uma boa liderança se baseia em:", "opts": ["Exemplo, respeito e comunicação clara", "Autoritarismo e imposição", "Falta de transparência com a equipe"], "correct": 0, "exp": "Boa liderança combina exemplo pessoal, respeito e comunicação clara com a equipe."}, {"q": "A LGPD trata sobre:", "opts": ["Proteção de dados pessoais", "Regulação de jornada de trabalho", "Normas de segurança industrial"], "correct": 0, "exp": "A LGPD (Lei Geral de Proteção de Dados) regula o tratamento de dados pessoais."}, {"q": "O trabalho voluntário é uma expressão de:", "opts": ["Cidadania ativa", "Obrigação trabalhista", "Estratégia de marketing pessoal apenas"], "correct": 0, "exp": "O trabalho voluntário reflete cidadania ativa e engajamento social."}, {"q": "Respeitar prazos e compromissos reflete:", "opts": ["Comprometimento profissional", "Desorganização", "Falta de responsabilidade"], "correct": 0, "exp": "Cumprir prazos e compromissos demonstra comprometimento profissional."}, {"q": "A tolerância no ambiente de trabalho significa:", "opts": ["Aceitar e conviver com diferenças", "Impor a própria visão aos demais", "Rejeitar opiniões divergentes"], "correct": 0, "exp": "Tolerância é a capacidade de conviver respeitosamente com diferenças de opinião e cultura."}, {"q": "Denúncias de irregularidades devem ser feitas:", "opts": ["Em redes sociais publicamente", "Pelos canais internos apropriados, como a ouvidoria", "Apenas para colegas de confiança, informalmente"], "correct": 1, "exp": "Denúncias devem seguir os canais internos apropriados, como ouvidoria ou compliance."}, {"q": "Um profissional ético evita:", "opts": ["Levar vantagem indevida sobre colegas ou clientes", "Cumprir os combinados com a equipe", "Manter a transparência nas relações de trabalho"], "correct": 0, "exp": "Um profissional ético evita obter vantagens indevidas sobre colegas ou clientes."}, {"q": "Um ambiente inclusivo garante:", "opts": ["Acessibilidade e oportunidades a pessoas com deficiência", "Barreiras físicas e sociais a certos grupos", "Exclusão de minorias dos processos seletivos"], "correct": 0, "exp": "Ambientes inclusivos garantem acessibilidade e oportunidades iguais a pessoas com deficiência."}, {"q": "Respeitar a propriedade intelectual de um colega significa, principalmente:", "opts": ["Dar o devido crédito por ideias e criações de autoria de outra pessoa", "Poder usar qualquer ideia alheia livremente, sem citar a fonte", "Registrar como própria uma ideia apresentada por outra pessoa"], "correct": 0, "exp": "Respeitar a propriedade intelectual envolve reconhecer e creditar a autoria de ideias e criações de terceiros."}, {"q": "A diversidade em equipes de trabalho contribui, principalmente, para:", "opts": ["Trazer diferentes perspectivas que enriquecem as decisões", "Tornar a comunicação sempre mais difícil e lenta", "Reduzir a criatividade nas soluções encontradas"], "correct": 0, "exp": "Equipes diversas reúnem perspectivas variadas, o que tende a enriquecer a qualidade das decisões tomadas."}, {"q": "O compliance corporativo refere-se, principalmente, a:", "opts": ["Um conjunto de práticas para garantir conformidade com leis e normas", "Um departamento exclusivo de vendas da empresa", "Uma técnica de precificação de produtos"], "correct": 0, "exp": "Compliance corporativo reúne práticas que garantem que a empresa siga leis, normas e políticas internas."}, {"q": "Conflitos entre gerações diferentes em uma mesma equipe devem ser tratados, principalmente, com:", "opts": ["Respeito mútuo e valorização das diferentes experiências", "Imposição da visão de um único grupo geracional", "Separação total entre os diferentes grupos etários"], "correct": 0, "exp": "Conflitos geracionais se resolvem melhor com respeito mútuo e valorização das diferentes experiências trazidas por cada grupo."}]}, {"id": 3, "track": "edu", "name": "Raciocínio Lógico e Análise de Dados", "hours": 20, "questions": [{"q": "Qual número completa a sequência: 2, 4, 6, 8, ___?", "opts": ["9", "10", "12"], "correct": 1, "exp": "A sequência avança de 2 em 2, então depois do 8 vem o 10."}, {"q": "Qual é a média aproximada do conjunto [4, 8, 15, 16, 23, 42]?", "opts": ["12", "18", "24"], "correct": 1, "exp": "A soma dos valores é 108; dividindo por 6 itens, a média é 18."}, {"q": "Se A > B e B > C, então:", "opts": ["A > C", "A < C", "A = C"], "correct": 0, "exp": "Pela propriedade transitiva, se A é maior que B e B é maior que C, então A é maior que C."}, {"q": "Quanto é 15% de 200?", "opts": ["20", "30", "35"], "correct": 1, "exp": "15% de 200 é igual a 0,15 × 200 = 30."}, {"q": "Qual é a mediana do conjunto [3, 7, 9, 2, 5]?", "opts": ["5", "7", "3"], "correct": 0, "exp": "Ordenando os valores (2,3,5,7,9), o valor central é 5."}, {"q": "Se todos os cachorros são animais, e Rex é um cachorro, então:", "opts": ["Rex é um animal", "Rex não é um animal", "Não é possível saber"], "correct": 0, "exp": "Por dedução lógica, se todo cachorro é animal e Rex é cachorro, Rex é animal."}, {"q": "Quanto é 2 elevado a 3 (2³)?", "opts": ["6", "8", "9"], "correct": 1, "exp": "2³ = 2 × 2 × 2 = 8."}, {"q": "Qual número não segue o padrão da sequência: 1, 3, 5, 8, 7?", "opts": ["8", "5", "1"], "correct": 0, "exp": "A sequência é de números ímpares (1,3,5,7...); o número 8 quebra o padrão."}, {"q": "Qual é a moda do conjunto [2, 2, 3, 4, 4, 4, 5]?", "opts": ["2", "4", "5"], "correct": 1, "exp": "A moda é o valor que mais se repete; o número 4 aparece 3 vezes."}, {"q": "Um produto custa R$ 50 e recebe 20% de desconto. Qual o preço final?", "opts": ["R$ 30", "R$ 40", "R$ 45"], "correct": 1, "exp": "20% de R$50 é R$10 de desconto, resultando em R$40."}, {"q": "Se 5 máquinas produzem 100 peças, quantas peças 10 máquinas produzem no mesmo tempo?", "opts": ["150", "200", "250"], "correct": 1, "exp": "Dobrando o número de máquinas (proporcionalidade direta), a produção também dobra: 200 peças."}, {"q": "Qual das opções é uma proposição lógica (pode ser verdadeira ou falsa)?", "opts": ["'O Brasil é um país'", "'Feche a porta, por favor'", "'Que dia lindo!'"], "correct": 0, "exp": "Uma proposição lógica é uma afirmação que pode ser classificada como verdadeira ou falsa."}, {"q": "Complete a sequência de Fibonacci: 1, 1, 2, 3, 5, 8, ___?", "opts": ["11", "13", "10"], "correct": 1, "exp": "Na sequência de Fibonacci, cada número é a soma dos dois anteriores: 5+8=13."}, {"q": "Se 'p' é falso e 'q' é verdadeiro, o valor lógico de 'p E q' é:", "opts": ["Verdadeiro", "Falso", "Indeterminado"], "correct": 1, "exp": "Na operação lógica 'E', o resultado só é verdadeiro se ambas as proposições forem verdadeiras."}, {"q": "Se 3 de cada 4 clientes estão satisfeitos, isso equivale a quantos por cento?", "opts": ["50%", "75%", "80%"], "correct": 1, "exp": "3 dividido por 4 é igual a 0,75, ou seja, 75%."}, {"q": "Qual a amplitude do conjunto de dados [10, 15, 7, 22]?", "opts": ["15", "22", "7"], "correct": 0, "exp": "Amplitude é a diferença entre o maior e o menor valor: 22 - 7 = 15."}, {"q": "Se x + 5 = 12, qual é o valor de x?", "opts": ["5", "7", "17"], "correct": 1, "exp": "Isolando x: x = 12 - 5 = 7."}, {"q": "Um conjunto de dados com muitos valores discrepantes (outliers) pode distorcer principalmente:", "opts": ["A média", "A contagem de dados", "O nome das variáveis"], "correct": 0, "exp": "Outliers afetam fortemente a média, podendo distorcer a interpretação dos dados."}, {"q": "Qual tipo de gráfico é mais indicado para mostrar evolução ao longo do tempo?", "opts": ["Gráfico de pizza", "Gráfico de linhas", "Gráfico de dispersão"], "correct": 1, "exp": "Gráficos de linhas são ideais para mostrar tendências e evolução ao longo do tempo."}, {"q": "Correlação entre duas variáveis não implica necessariamente:", "opts": ["Relação numérica entre elas", "Causalidade entre elas", "Que ambas variam juntas"], "correct": 1, "exp": "Correlação não implica causalidade: duas variáveis podem estar relacionadas sem que uma cause a outra."}, {"q": "Se um valor de 8 é dobrado, o resultado é:", "opts": ["12", "16", "18"], "correct": 1, "exp": "Dobrar o valor 8 resulta em 16 (8 × 2)."}, {"q": "Qual das opções é um exemplo de dado qualitativo?", "opts": ["Cor do produto", "Idade do cliente", "Valor da compra"], "correct": 0, "exp": "Dados qualitativos descrevem características não numéricas, como a cor de um produto."}, {"q": "Qual das opções é um exemplo de dado quantitativo?", "opts": ["Cor do produto", "Idade do cliente", "Marca do produto"], "correct": 1, "exp": "Dados quantitativos são numéricos, como a idade de um cliente."}, {"q": "Se 3 pessoas concluem um trabalho em 6 dias, em quanto tempo 6 pessoas concluiriam o mesmo trabalho?", "opts": ["6 dias", "3 dias", "12 dias"], "correct": 1, "exp": "Dobrando o número de pessoas, o tempo necessário é reduzido pela metade: 3 dias."}, {"q": "De um total de 120 vendas, 30 foram canceladas. Qual a porcentagem de cancelamento?", "opts": ["15%", "20%", "25%"], "correct": 2, "exp": "30 de 120 corresponde a 30/120 = 0,25, ou seja, 25%."}, {"q": "Em uma tabela de frequência, a 'frequência absoluta' representa:", "opts": ["A quantidade de vezes que um valor aparece", "A porcentagem de um valor no total", "A soma de todos os valores"], "correct": 0, "exp": "Frequência absoluta é o número de vezes que um valor específico aparece nos dados."}, {"q": "O desvio padrão em um conjunto de dados mede:", "opts": ["A dispersão dos dados em torno da média", "O valor máximo do conjunto", "A quantidade total de dados"], "correct": 0, "exp": "Desvio padrão mede o quanto os valores se dispersam em relação à média."}, {"q": "Se o conjunto A é subconjunto de B, e x pertence a A, então:", "opts": ["x pertence a B", "x não pertence a B", "x é igual a B"], "correct": 0, "exp": "Se A é subconjunto de B, todo elemento de A também pertence a B."}, {"q": "Se 40% de um número é igual a 20, qual é esse número?", "opts": ["40", "50", "60"], "correct": 1, "exp": "Se 40% de x é 20, então x = 20 ÷ 0,40 = 50."}, {"q": "Qual estrutura lógica corresponde à expressão 'se... então...'?", "opts": ["Conjunção", "Condicional", "Negação"], "correct": 1, "exp": "A estrutura 'se... então...' representa uma proposição condicional na lógica."}, {"q": "Qual número completa a sequência: 3, 6, 12, 24, ___?", "opts": ["30", "48", "36"], "correct": 1, "exp": "A sequência dobra o valor anterior a cada termo; após 24, o próximo valor é 48."}, {"q": "Se a probabilidade de chover amanhã é de 30%, qual a probabilidade de não chover?", "opts": ["50%", "60%", "70%"], "correct": 2, "exp": "Como a soma das probabilidades complementares é 100%, a chance de não chover é 100% - 30% = 70%."}, {"q": "Ao interpretar um gráfico de barras comparando vendas mensais, o eixo vertical geralmente representa:", "opts": ["A grandeza medida (como valor ou quantidade de vendas)", "Sempre o nome dos meses do ano", "O nome da empresa analisada"], "correct": 0, "exp": "O eixo vertical de um gráfico de barras costuma representar a grandeza medida, como valor ou quantidade."}]}, {"id": 4, "track": "edu", "name": "Saúde e Segurança do Trabalho", "hours": 20, "questions": [{"q": "A sigla EPI significa:", "opts": ["Equipamento de Proteção Industrial", "Equipamento de Proteção Individual", "Estrutura de Prevenção Interna"], "correct": 1, "exp": "EPI é Equipamento de Proteção Individual, usado para proteger o trabalhador de riscos."}, {"q": "Sobre ergonomia ao trabalhar com computador, o recomendado é:", "opts": ["Tela abaixo da linha dos olhos, pulsos sempre flexionados", "Monitor na altura dos olhos, pés apoiados e pausas regulares", "Sentar o mais próximo possível da tela"], "correct": 1, "exp": "Boas práticas ergonômicas incluem monitor na altura dos olhos, pés apoiados e pausas regulares."}, {"q": "A sigla CIPA refere-se a:", "opts": ["Comissão Interna de Prevenção de Acidentes e de Assédio", "Central de Inspeção e Proteção Ambiental", "Conselho Interno de Produtividade e Atividade"], "correct": 0, "exp": "CIPA é a Comissão Interna de Prevenção de Acidentes e de Assédio."}, {"q": "A sinalização de segurança amarela geralmente indica:", "opts": ["Atenção/cuidado", "Proibição total", "Rota de fuga"], "correct": 0, "exp": "A cor amarela em sinalizações de segurança geralmente indica atenção ou cuidado."}, {"q": "Em caso de incêndio, deve-se:", "opts": ["Acionar o alarme e seguir a rota de fuga", "Ignorar e continuar trabalhando", "Usar o elevador para sair rapidamente"], "correct": 0, "exp": "Em incêndios, deve-se acionar o alarme e seguir a rota de fuga, nunca usar elevadores."}, {"q": "Uma Norma Regulamentadora (NR) tem como objetivo:", "opts": ["Estabelecer requisitos de segurança e saúde no trabalho", "Definir apenas o salário mínimo", "Regular o horário comercial das empresas"], "correct": 0, "exp": "As NRs estabelecem requisitos técnicos e legais de segurança e saúde ocupacional."}, {"q": "Um acidente de trabalho típico pode incluir:", "opts": ["Queda, corte ou choque elétrico", "Apenas problemas administrativos", "Erros de digitação"], "correct": 0, "exp": "Acidentes de trabalho comuns incluem quedas, cortes e choques elétricos."}, {"q": "A postura correta ao sentar-se para trabalhar é:", "opts": ["Costas curvadas e pés soltos", "Costas retas e pés apoiados no chão", "Sentar na ponta da cadeira"], "correct": 1, "exp": "A postura correta envolve costas retas e pés apoiados no chão."}, {"q": "A ginástica laboral serve para:", "opts": ["Prevenir lesões e reduzir a fadiga", "Substituir o intervalo de almoço", "Aumentar a carga horária de trabalho"], "correct": 0, "exp": "A ginástica laboral ajuda a prevenir lesões e reduzir a fadiga muscular."}, {"q": "LER/DORT está relacionada principalmente a:", "opts": ["Movimentos repetitivos", "Alimentação inadequada", "Falta de sono"], "correct": 0, "exp": "LER/DORT são lesões associadas a esforços repetitivos e posturas inadequadas no trabalho."}, {"q": "Um extintor de incêndio classe C é indicado para:", "opts": ["Materiais como madeira e papel", "Equipamentos elétricos energizados", "Líquidos inflamáveis"], "correct": 1, "exp": "Extintores classe C são indicados para incêndios em equipamentos elétricos energizados."}, {"q": "Um EPI usado para proteção auditiva é:", "opts": ["Capacete", "Protetor auricular", "Luva"], "correct": 1, "exp": "O protetor auricular é o EPI destinado à proteção contra ruídos excessivos."}, {"q": "A pausa recomendada em trabalho contínuo no computador deve ocorrer aproximadamente:", "opts": ["A cada 10 minutos", "A cada 50 minutos", "Apenas uma vez ao dia"], "correct": 1, "exp": "Recomenda-se uma pausa curta a cada cerca de 50 minutos de trabalho contínuo no computador."}, {"q": "A sinalização vermelha em segurança geralmente indica:", "opts": ["Informação geral", "Perigo ou proibição", "Local de descanso"], "correct": 1, "exp": "A cor vermelha em sinalizações indica perigo, proibição ou equipamentos de combate a incêndio."}, {"q": "Um ambiente de trabalho seguro depende principalmente de:", "opts": ["Sorte e acaso", "Prevenção e uso correto de EPIs", "Ignorar os riscos existentes"], "correct": 1, "exp": "Ambientes seguros dependem de prevenção constante e uso correto dos equipamentos de proteção."}, {"q": "A CAT (Comunicação de Acidente de Trabalho) deve ser emitida:", "opts": ["Apenas se o acidente for grave", "Em caso de acidente ou doença ocupacional", "Somente a pedido do trabalhador"], "correct": 1, "exp": "A CAT deve ser emitida sempre que ocorrer acidente de trabalho ou doença ocupacional."}, {"q": "Iluminação inadequada no posto de trabalho pode causar:", "opts": ["Fadiga visual", "Melhora do desempenho", "Nenhum efeito relevante"], "correct": 0, "exp": "Iluminação inadequada pode causar fadiga visual e outros problemas de saúde."}, {"q": "Cabos soltos no chão do escritório representam risco de:", "opts": ["Incêndio garantido", "Quedas e tropeços", "Nenhum risco relevante"], "correct": 1, "exp": "Cabos soltos no chão são um risco comum de quedas e tropeços."}, {"q": "O estresse ocupacional pode ser reduzido com:", "opts": ["Organização do trabalho e pausas adequadas", "Aumento da carga de trabalho", "Eliminação de qualquer pausa"], "correct": 0, "exp": "Boa organização do trabalho e pausas adequadas ajudam a reduzir o estresse ocupacional."}, {"q": "Um dos objetivos da Saúde e Segurança do Trabalho (SST) é:", "opts": ["Aumentar a burocracia da empresa", "Reduzir acidentes e doenças ocupacionais", "Elevar os custos sem benefício"], "correct": 1, "exp": "A SST busca reduzir acidentes de trabalho e doenças ocupacionais."}, {"q": "O treinamento de segurança no trabalho deve ocorrer:", "opts": ["Apenas uma vez, na contratação", "Periodicamente e na admissão", "Somente quando ocorre um acidente"], "correct": 1, "exp": "Treinamentos de segurança devem ocorrer na admissão e periodicamente ao longo do vínculo."}, {"q": "Um ambiente ergonomicamente adequado ajuda a reduzir:", "opts": ["Lesões musculoesqueléticas", "A produtividade da equipe", "O engajamento dos colaboradores"], "correct": 0, "exp": "A ergonomia adequada reduz o risco de lesões musculoesqueléticas."}, {"q": "O ruído excessivo no ambiente de trabalho pode causar:", "opts": ["Melhora da concentração", "Perda auditiva", "Aumento da produtividade"], "correct": 1, "exp": "A exposição prolongada a ruído excessivo pode causar perda auditiva."}, {"q": "Em uma emergência, o ponto de encontro serve para:", "opts": ["Reunir todos para uma confraternização", "Contabilizar as pessoas em segurança", "Guardar equipamentos de trabalho"], "correct": 1, "exp": "O ponto de encontro serve para verificar se todos os colaboradores estão seguros após uma evacuação."}, {"q": "Um dos primeiros socorros básicos em uma emergência é:", "opts": ["Manter a calma e acionar ajuda especializada", "Mover a vítima bruscamente", "Ignorar a situação até alguém perceber"], "correct": 0, "exp": "Manter a calma e acionar ajuda especializada é uma atitude básica correta em emergências."}, {"q": "O manuseio inadequado de cargas pode causar:", "opts": ["Lesões na coluna", "Melhora da postura", "Nenhum risco à saúde"], "correct": 0, "exp": "O manuseio incorreto de cargas pesadas pode causar lesões na coluna e outras partes do corpo."}, {"q": "O uso de cadeira ergonômica ajuda a:", "opts": ["Manter postura adequada durante o trabalho", "Substituir pausas regulares", "Aumentar o ritmo de digitação"], "correct": 0, "exp": "Cadeiras ergonômicas ajudam a manter uma postura adequada durante longos períodos sentado."}, {"q": "O mapa de risco de uma empresa identifica:", "opts": ["Áreas com riscos ocupacionais", "Localização dos escritórios administrativos", "Metas de vendas do setor"], "correct": 0, "exp": "O mapa de risco identifica visualmente as áreas com riscos ocupacionais na empresa."}, {"q": "Simulados de evacuação servem para:", "opts": ["Testar apenas os alarmes sonoros", "Preparar os funcionários para emergências reais", "Atrapalhar a rotina de trabalho"], "correct": 1, "exp": "Simulados de evacuação preparam os colaboradores para agir corretamente em emergências reais."}, {"q": "A saúde mental no trabalho é considerada parte de:", "opts": ["Apenas assuntos pessoais, sem relação com o trabalho", "Segurança e saúde ocupacional", "Nenhuma política da empresa"], "correct": 1, "exp": "A saúde mental é hoje reconhecida como parte importante da segurança e saúde ocupacional."}, {"q": "A CAT (Comunicação de Acidente de Trabalho) deve ser emitida:", "opts": ["Em caso de acidente de trabalho ou doença ocupacional", "Apenas quando o colaborador solicitar formalmente", "Somente em caso de acidentes fatais"], "correct": 0, "exp": "A CAT deve ser emitida sempre que ocorrer acidente de trabalho ou doença ocupacional, não apenas em casos fatais."}, {"q": "A ergonomia dinâmica, aplicada a atividades com movimento, busca, principalmente:", "opts": ["Adequar posturas e esforços durante tarefas que exigem movimentação", "Adequar apenas posturas estáticas, como sentar-se corretamente", "Eliminar totalmente a necessidade de pausas no trabalho"], "correct": 0, "exp": "Ergonomia dinâmica trata da adequação de posturas e esforços em atividades que envolvem movimento constante."}, {"q": "A NR-07 trata, principalmente, de:", "opts": ["Programas de Controle Médico de Saúde Ocupacional (PCMSO)", "Proteção contra incêndios", "Sinalização de segurança"], "correct": 0, "exp": "A NR-07 estabelece diretrizes para o Programa de Controle Médico de Saúde Ocupacional (PCMSO)."}]}, {"id": 5, "track": "edu", "name": "Planejamento e Organização do Trabalho", "hours": 20, "questions": [{"q": "A Matriz de Eisenhower classifica as tarefas por:", "opts": ["Urgência e importância", "Custo e benefício", "Tamanho da equipe"], "correct": 0, "exp": "A Matriz de Eisenhower organiza tarefas em quadrantes de urgência x importância."}, {"q": "O planejamento é a etapa que:", "opts": ["Executa a tarefa", "Define o que será feito antes da execução", "Avalia o resultado final apenas"], "correct": 1, "exp": "O planejamento define o que será feito, antes de iniciar a execução das atividades."}, {"q": "Um cronograma serve, principalmente, para:", "opts": ["Organizar tarefas no tempo", "Substituir reuniões de equipe", "Eliminar a necessidade de metas"], "correct": 0, "exp": "O cronograma organiza as tarefas ao longo do tempo, definindo prazos."}, {"q": "Priorizar tarefas ajuda a:", "opts": ["Focar no que é mais importante primeiro", "Fazer tudo ao mesmo tempo sem critério", "Ignorar prazos estabelecidos"], "correct": 0, "exp": "A priorização ajuda a concentrar esforços nas tarefas mais importantes primeiro."}, {"q": "O método SMART define metas que devem ser:", "opts": ["Específicas, mensuráveis, atingíveis, relevantes e temporais", "Genéricas e sem prazo definido", "Impossíveis de medir"], "correct": 0, "exp": "SMART significa metas específicas, mensuráveis, atingíveis, relevantes e temporais."}, {"q": "Procrastinação é o ato de:", "opts": ["Concluir tarefas antes do prazo", "Adiar tarefas importantes sem necessidade", "Planejar tarefas com antecedência"], "correct": 1, "exp": "Procrastinação é adiar tarefas importantes sem uma razão justificável."}, {"q": "Um cronograma de Gantt mostra:", "opts": ["Tarefas e seus prazos ao longo do tempo", "Apenas o orçamento do projeto", "A estrutura hierárquica da empresa"], "correct": 0, "exp": "O gráfico de Gantt exibe as tarefas de um projeto e seus respectivos prazos visualmente."}, {"q": "Delegar tarefas é importante para:", "opts": ["Otimizar o tempo e desenvolver a equipe", "Sobrecarregar apenas uma pessoa", "Evitar que a equipe aprenda novas funções"], "correct": 0, "exp": "Delegar tarefas otimiza o tempo do gestor e desenvolve as competências da equipe."}, {"q": "Uma lista de tarefas (to-do list) serve para:", "opts": ["Organizar e visualizar tarefas pendentes", "Substituir o planejamento estratégico", "Eliminar a necessidade de prazos"], "correct": 0, "exp": "A to-do list ajuda a organizar e visualizar as tarefas pendentes do dia a dia."}, {"q": "A reavaliação de metas deve ocorrer:", "opts": ["Apenas uma vez, no início do projeto", "Periodicamente, ao longo do tempo", "Nunca, para não gerar confusão"], "correct": 1, "exp": "As metas devem ser reavaliadas periodicamente para ajustes conforme necessário."}, {"q": "Uma boa gestão do tempo tende a reduzir:", "opts": ["Retrabalho e atrasos", "A qualidade das entregas", "O engajamento da equipe"], "correct": 0, "exp": "Boa gestão do tempo reduz retrabalho e atrasos nas entregas."}, {"q": "Um objetivo 'mensurável' (no método SMART) deve ter:", "opts": ["Um indicador quantificável de progresso", "Apenas uma descrição vaga", "Nenhum prazo definido"], "correct": 0, "exp": "Metas mensuráveis possuem indicadores quantificáveis que permitem acompanhar o progresso."}, {"q": "O ciclo PDCA é composto pelas etapas:", "opts": ["Planejar, Fazer, Checar e Agir", "Produzir, Distribuir, Cobrar e Avaliar", "Pensar, Discutir, Concluir e Arquivar"], "correct": 0, "exp": "PDCA significa Plan (Planejar), Do (Fazer), Check (Checar) e Act (Agir)."}, {"q": "A organização do ambiente de trabalho impacta diretamente:", "opts": ["A produtividade", "Apenas a estética do espaço", "O clima, sem relação com resultados"], "correct": 0, "exp": "Um ambiente organizado impacta positivamente a produtividade do trabalho."}, {"q": "A multitarefa excessiva pode:", "opts": ["Aumentar sempre a qualidade do trabalho", "Reduzir a qualidade e o foco nas tarefas", "Eliminar completamente os erros"], "correct": 1, "exp": "Fazer muitas tarefas ao mesmo tempo tende a reduzir o foco e a qualidade do trabalho."}, {"q": "Um cronograma realista deve considerar:", "opts": ["Apenas o tempo ideal, sem imprevistos", "Tempo disponível e possíveis imprevistos", "Somente a opinião de um único colaborador"], "correct": 1, "exp": "Cronogramas realistas consideram o tempo disponível e margem para imprevistos."}, {"q": "Reuniões de alinhamento servem, principalmente, para:", "opts": ["Acompanhar o progresso do planejamento", "Substituir todo o planejamento inicial", "Aumentar a burocracia sem necessidade"], "correct": 0, "exp": "Reuniões de alinhamento ajudam a acompanhar e ajustar o progresso das atividades planejadas."}, {"q": "O 'backlog' é:", "opts": ["Uma lista priorizada de tarefas pendentes", "Um tipo de gráfico financeiro", "Um documento de recursos humanos"], "correct": 0, "exp": "Backlog é uma lista de tarefas ou itens pendentes a serem priorizados e executados."}, {"q": "O planejamento estratégico é geralmente de:", "opts": ["Curto prazo", "Longo prazo", "Prazo indefinido, sem relação temporal"], "correct": 1, "exp": "O planejamento estratégico normalmente abrange um horizonte de longo prazo."}, {"q": "O planejamento operacional é geralmente de:", "opts": ["Longo prazo", "Curto prazo, focado no dia a dia", "Sem qualquer prazo definido"], "correct": 1, "exp": "O planejamento operacional trata das atividades de curto prazo, no dia a dia da organização."}, {"q": "Definir prioridades ajuda a evitar, principalmente:", "opts": ["A sobrecarga de trabalho", "O cumprimento de metas", "A comunicação entre equipes"], "correct": 0, "exp": "Definir prioridades evita a sobrecarga, concentrando esforços no que é mais importante."}, {"q": "Um erro comum de planejamento é:", "opts": ["Considerar riscos e imprevistos", "Subestimar o tempo necessário para as tarefas", "Definir prazos realistas"], "correct": 1, "exp": "Subestimar o tempo necessário é um erro comum que compromete o cumprimento de prazos."}, {"q": "Indicadores de desempenho ajudam a:", "opts": ["Medir o progresso das metas", "Substituir todo o planejamento", "Eliminar a necessidade de acompanhamento"], "correct": 0, "exp": "Indicadores de desempenho permitem medir objetivamente o progresso em direção às metas."}, {"q": "A organização de arquivos e documentos contribui para:", "opts": ["Maior dificuldade em localizar informações", "Agilidade na busca de informações", "Aumento do retrabalho"], "correct": 1, "exp": "Arquivos bem organizados tornam mais ágil a busca por informações necessárias."}, {"q": "Metas de curto prazo geralmente ajudam a:", "opts": ["Alcançar objetivos maiores de forma gradual", "Substituir metas de longo prazo", "Impedir o planejamento estratégico"], "correct": 0, "exp": "Metas de curto prazo funcionam como etapas para alcançar objetivos maiores gradualmente."}, {"q": "Um bom planejamento deve considerar:", "opts": ["Apenas os recursos disponíveis, ignorando prazos", "Recursos, prazos e riscos envolvidos", "Somente o desejo pessoal do gestor"], "correct": 1, "exp": "Um bom planejamento leva em conta recursos, prazos e riscos de forma integrada."}, {"q": "Revisar o planejamento após a execução é uma etapa de:", "opts": ["Avaliação", "Execução inicial", "Delegação de tarefas"], "correct": 0, "exp": "A revisão pós-execução é a etapa de avaliação dos resultados obtidos."}, {"q": "Gerenciar imprevistos durante um projeto exige:", "opts": ["Rigidez total ao planejamento inicial", "Flexibilidade e ajuste do planejamento", "Ignorar completamente o que foi planejado"], "correct": 1, "exp": "Lidar com imprevistos exige flexibilidade para ajustar o planejamento original."}, {"q": "Um cronograma bem feito ajuda a evitar:", "opts": ["Conflitos de prazos entre tarefas", "O uso de indicadores de desempenho", "A comunicação entre a equipe"], "correct": 0, "exp": "Um bom cronograma evita conflitos de prazos e sobreposição de tarefas."}, {"q": "A organização pessoal no trabalho inclui:", "opts": ["Gestão de tempo, tarefas e prioridades", "Apenas a limpeza da mesa de trabalho", "Ignorar completamente prazos"], "correct": 0, "exp": "Organização pessoal envolve gerenciar bem o tempo, as tarefas e as prioridades diárias."}, {"q": "A técnica Pomodoro de gestão do tempo consiste em:", "opts": ["Alternar períodos de foco intenso com pequenas pausas", "Trabalhar continuamente por 8 horas sem qualquer pausa", "Eliminar totalmente qualquer intervalo durante o expediente"], "correct": 0, "exp": "A técnica Pomodoro alterna ciclos de foco intenso (geralmente 25 min) com pequenas pausas regulares."}, {"q": "Agrupar tarefas semelhantes para executá-las em sequência (batching) tem como objetivo, principalmente:", "opts": ["Reduzir o tempo perdido com trocas de contexto entre tarefas", "Aumentar o número de interrupções durante o trabalho", "Eliminar a necessidade de qualquer planejamento prévio"], "correct": 0, "exp": "Batching reduz o tempo perdido com mudanças de contexto, aumentando a eficiência ao executar tarefas semelhantes."}, {"q": "Uma delegação de tarefas eficaz deve, principalmente:", "opts": ["Considerar as competências e a carga de trabalho de quem recebe a tarefa", "Delegar sempre para a mesma pessoa, independente da carga atual", "Evitar fornecer qualquer contexto sobre o que precisa ser feito"], "correct": 0, "exp": "Delegação eficaz considera competências e disponibilidade da pessoa, além de fornecer contexto claro sobre a tarefa."}, {"q": "Um plano de contingência em um projeto serve, principalmente, para:", "opts": ["Preparar respostas para possíveis imprevistos durante a execução", "Eliminar totalmente qualquer risco do projeto", "Substituir por completo o planejamento original"], "correct": 0, "exp": "Planos de contingência preparam respostas alternativas para imprevistos que possam surgir durante a execução."}]}, {"id": 6, "track": "edu", "name": "Transformação Digital no Setor Industrial", "hours": 20, "questions": [{"q": "A chamada 'Indústria 4.0' é caracterizada por:", "opts": ["Uso predominante de máquinas a vapor", "Integração de dados, automação e conectividade", "Produção artesanal em pequena escala"], "correct": 1, "exp": "A Indústria 4.0 conecta máquinas, sistemas e dados por meio de automação e conectividade."}, {"q": "A sigla IoT significa:", "opts": ["Internet das Coisas", "Integração de Operações Técnicas", "Índice de Otimização Total"], "correct": 0, "exp": "IoT (Internet of Things) refere-se à conexão de dispositivos e sensores à internet."}, {"q": "Big Data refere-se a:", "opts": ["Pequenos volumes de dados simples", "Grandes volumes de dados complexos", "Apenas dados financeiros"], "correct": 1, "exp": "Big Data trata de grandes volumes de dados, com alta velocidade e variedade."}, {"q": "A automação industrial tem como benefício reduzir:", "opts": ["A qualidade dos produtos", "O trabalho manual repetitivo", "A segurança dos processos"], "correct": 1, "exp": "A automação reduz a necessidade de trabalho manual repetitivo em processos industriais."}, {"q": "Sensores industriais são usados principalmente para:", "opts": ["Coletar dados em tempo real dos processos", "Substituir toda a mão de obra humana", "Armazenar arquivos administrativos"], "correct": 0, "exp": "Sensores coletam dados em tempo real sobre o funcionamento de máquinas e processos."}, {"q": "A computação em nuvem permite:", "opts": ["Armazenar e acessar dados remotamente", "Apenas processar dados localmente", "Eliminar a necessidade de internet"], "correct": 0, "exp": "A computação em nuvem permite armazenar e acessar dados de qualquer lugar via internet."}, {"q": "A manutenção preditiva usa dados para:", "opts": ["Prever falhas antes que ocorram", "Aumentar o número de paradas não planejadas", "Ignorar o histórico de manutenções"], "correct": 0, "exp": "A manutenção preditiva utiliza dados de sensores para prever falhas antes que aconteçam."}, {"q": "Robôs colaborativos (cobots) são projetados para:", "opts": ["Trabalhar isolados, sem contato humano", "Trabalhar junto com humanos em segurança", "Substituir totalmente a supervisão humana"], "correct": 1, "exp": "Cobots são robôs projetados para operar em conjunto com humanos de forma segura."}, {"q": "A digitalização de processos administrativos visa, principalmente:", "opts": ["Aumentar o uso de papel", "Eliminar papel e agilizar fluxos de trabalho", "Tornar os processos mais lentos"], "correct": 1, "exp": "A digitalização busca eliminar papel e tornar os fluxos de trabalho mais ágeis."}, {"q": "A cibersegurança industrial tem como objetivo:", "opts": ["Proteger sistemas e dados contra ataques", "Aumentar a exposição a riscos digitais", "Eliminar toda tecnologia digital da fábrica"], "correct": 0, "exp": "A cibersegurança protege sistemas industriais e dados contra ataques cibernéticos."}, {"q": "O 'gêmeo digital' (digital twin) é:", "opts": ["Uma réplica virtual de um sistema físico", "Um funcionário que trabalha remotamente", "Um tipo de sensor de temperatura"], "correct": 0, "exp": "O gêmeo digital é uma representação virtual de um ativo, processo ou sistema físico real."}, {"q": "Machine Learning é um subcampo de:", "opts": ["Inteligência Artificial", "Engenharia mecânica tradicional", "Gestão de recursos humanos"], "correct": 0, "exp": "Machine Learning é um subcampo da Inteligência Artificial voltado ao aprendizado a partir de dados."}, {"q": "A conectividade 5G permite, entre outros benefícios:", "opts": ["Comunicação de dados mais rápida e com menor latência", "Eliminação total da necessidade de redes", "Redução da qualidade da conexão"], "correct": 0, "exp": "O 5G oferece maior velocidade e menor latência na comunicação de dados."}, {"q": "Um dos benefícios da automação industrial é:", "opts": ["Redução da produtividade", "Aumento da produtividade", "Aumento do trabalho manual repetitivo"], "correct": 1, "exp": "A automação tende a aumentar a produtividade dos processos industriais."}, {"q": "Dados gerados por máquinas conectadas são chamados de:", "opts": ["Dados de IoT", "Dados administrativos apenas", "Dados financeiros exclusivamente"], "correct": 0, "exp": "Dados gerados por dispositivos conectados via Internet das Coisas são chamados de dados de IoT."}, {"q": "Além da tecnologia, a transformação digital exige também:", "opts": ["Mudança cultural e capacitação das pessoas", "Eliminação total de processos manuais imediatamente", "Ausência de qualquer planejamento"], "correct": 0, "exp": "A transformação digital exige mudança cultural e capacitação das pessoas, não só tecnologia."}, {"q": "Um ERP integrado ajuda na Indústria 4.0 a:", "opts": ["Unificar informações de diferentes setores", "Isolar as informações entre departamentos", "Eliminar a necessidade de dados"], "correct": 0, "exp": "Um ERP integrado reúne e unifica informações de diferentes áreas da empresa."}, {"q": "A realidade aumentada pode ser usada na indústria para:", "opts": ["Treinamento e manutenção assistida", "Substituir toda a produção física", "Eliminar a necessidade de sensores"], "correct": 0, "exp": "A realidade aumentada auxilia em treinamentos e na manutenção assistida por meio de sobreposição digital."}, {"q": "O blockchain pode ser usado na indústria para:", "opts": ["Rastreabilidade e segurança de dados", "Aumentar a vulnerabilidade dos dados", "Substituir sensores industriais"], "correct": 0, "exp": "Blockchain oferece rastreabilidade e maior segurança no registro de dados e transações."}, {"q": "Um dos riscos da transformação digital é:", "opts": ["Maior exposição a ataques cibernéticos", "Redução total dos riscos organizacionais", "Eliminação de qualquer vulnerabilidade"], "correct": 0, "exp": "A maior conectividade digital também aumenta a exposição a riscos cibernéticos."}, {"q": "A análise de dados industriais ajuda a:", "opts": ["Otimizar processos e reduzir desperdícios", "Aumentar desperdícios de forma proposital", "Eliminar a necessidade de indicadores"], "correct": 0, "exp": "A análise de dados permite identificar oportunidades de otimização e redução de desperdícios."}, {"q": "A impressão 3D na indústria permite:", "opts": ["Prototipagem rápida e produção sob demanda", "Apenas a impressão de documentos", "Eliminar toda produção em série"], "correct": 0, "exp": "A impressão 3D possibilita prototipagem rápida e produção customizada sob demanda."}, {"q": "Dashboards industriais servem para:", "opts": ["Monitorar indicadores em tempo real", "Armazenar arquivos de forma permanente", "Substituir toda comunicação da equipe"], "correct": 0, "exp": "Dashboards permitem o monitoramento visual de indicadores de desempenho em tempo real."}, {"q": "Um dos pilares da Indústria 4.0 é:", "opts": ["Interoperabilidade entre sistemas", "Isolamento total entre sistemas", "Eliminação de qualquer conectividade"], "correct": 0, "exp": "A interoperabilidade entre sistemas é um dos pilares fundamentais da Indústria 4.0."}, {"q": "A computação de borda (edge computing) processa dados:", "opts": ["Próximo à origem, reduzindo a latência", "Apenas em servidores distantes, sempre", "Sem qualquer relação com sensores"], "correct": 0, "exp": "Edge computing processa dados próximo à sua origem, reduzindo a latência de resposta."}, {"q": "A RPA (automação robótica de processos) é usada para:", "opts": ["Automatizar tarefas repetitivas", "Substituir toda a criatividade humana", "Eliminar a necessidade de sistemas"], "correct": 0, "exp": "RPA automatiza tarefas repetitivas e baseadas em regras, liberando tempo para atividades estratégicas."}, {"q": "A sustentabilidade na Indústria 4.0 pode ser alcançada com:", "opts": ["Otimização de recursos por meio de dados", "Aumento do desperdício de recursos", "Eliminação do uso de tecnologia"], "correct": 0, "exp": "O uso inteligente de dados ajuda a otimizar recursos e promover sustentabilidade."}, {"q": "Um exemplo simples de transformação digital é:", "opts": ["Substituir planilhas manuais por sistemas integrados", "Manter todos os registros apenas em papel", "Eliminar qualquer uso de computadores"], "correct": 0, "exp": "Substituir controles manuais em papel por sistemas integrados é um exemplo simples de transformação digital."}, {"q": "A capacitação digital dos trabalhadores é importante para:", "opts": ["Acompanhar as mudanças tecnológicas", "Evitar qualquer atualização profissional", "Reduzir o uso de novas tecnologias"], "correct": 0, "exp": "Capacitar os trabalhadores é essencial para que acompanhem as mudanças tecnológicas do setor."}, {"q": "Dados em tempo real ajudam os gestores a:", "opts": ["Tomar decisões mais rápidas e precisas", "Atrasar decisões importantes", "Ignorar informações relevantes"], "correct": 0, "exp": "Dados em tempo real permitem decisões mais rápidas e embasadas por parte dos gestores."}, {"q": "A realidade aumentada aplicada à indústria pode ser usada, por exemplo, para:", "opts": ["Auxiliar em treinamentos e manutenção assistida por camadas digitais", "Substituir totalmente a necessidade de manutenção física", "Eliminar a necessidade de qualquer treinamento presencial"], "correct": 0, "exp": "A realidade aumentada sobrepõe informações digitais ao ambiente real, auxiliando treinamentos e manutenções."}, {"q": "A cibersegurança industrial tem como principal foco:", "opts": ["Proteger sistemas e dados de operações industriais contra ataques", "Aumentar a exposição de dados industriais na internet", "Eliminar completamente o uso de redes conectadas na indústria"], "correct": 0, "exp": "Cibersegurança industrial protege sistemas e dados de operações contra ataques e acessos não autorizados."}, {"q": "A manutenção 4.0, apoiada em sensores e dados, busca, principalmente:", "opts": ["Antecipar falhas antes que ocorram, com base em dados coletados", "Aumentar o número de paradas não planejadas", "Eliminar totalmente a necessidade de qualquer manutenção"], "correct": 0, "exp": "A manutenção 4.0 usa dados de sensores para antecipar falhas, reduzindo paradas não planejadas."}]}, {"id": 7, "track": "op", "name": "Informática Básica", "hours": 60, "questions": [{"q": "A extensão de arquivo típica de uma planilha do Excel é:", "opts": [".docx", ".xlsx", ".pptx"], "correct": 1, "exp": ".xlsx é a extensão padrão de pastas de trabalho do Microsoft Excel."}, {"q": "O atalho de teclado Ctrl + C serve para:", "opts": ["Colar um conteúdo", "Copiar um conteúdo selecionado", "Desfazer a última ação"], "correct": 1, "exp": "Ctrl+C copia o conteúdo selecionado para a área de transferência."}, {"q": "O atalho de teclado Ctrl + V serve para:", "opts": ["Colar um conteúdo copiado", "Copiar um conteúdo", "Salvar o arquivo"], "correct": 0, "exp": "Ctrl+V cola o conteúdo previamente copiado ou recortado."}, {"q": "O atalho de teclado Ctrl + Z serve para:", "opts": ["Refazer a última ação", "Desfazer a última ação", "Fechar o programa"], "correct": 1, "exp": "Ctrl+Z desfaz a última ação realizada no programa."}, {"q": "Um sistema operacional é:", "opts": ["Um software que gerencia o hardware e outros programas", "Um tipo de impressora", "Um cabo de conexão de rede"], "correct": 0, "exp": "O sistema operacional gerencia os recursos de hardware e permite a execução de outros programas."}, {"q": "Um exemplo de sistema operacional é:", "opts": ["Windows", "Excel", "Chrome"], "correct": 0, "exp": "Windows é um exemplo de sistema operacional; Excel e Chrome são aplicativos."}, {"q": "Um exemplo de navegador de internet é:", "opts": ["Google Chrome", "Microsoft Word", "Adobe Reader"], "correct": 0, "exp": "Google Chrome é um navegador usado para acessar páginas da internet."}, {"q": "A extensão típica de um documento do Word é:", "opts": [".xlsx", ".docx", ".pptx"], "correct": 1, "exp": ".docx é a extensão padrão de documentos criados no Microsoft Word."}, {"q": "A extensão típica de uma apresentação do PowerPoint é:", "opts": [".pptx", ".docx", ".csv"], "correct": 0, "exp": ".pptx é a extensão padrão de apresentações do Microsoft PowerPoint."}, {"q": "Uma pasta (diretório) no computador serve para:", "opts": ["Organizar arquivos", "Executar programas automaticamente", "Aumentar a memória RAM"], "correct": 0, "exp": "Pastas servem para organizar e agrupar arquivos no computador."}, {"q": "O armazenamento em nuvem (cloud storage) permite:", "opts": ["Armazenar e acessar arquivos pela internet", "Apagar arquivos automaticamente", "Aumentar a velocidade do processador"], "correct": 0, "exp": "Armazenamento em nuvem permite guardar e acessar arquivos remotamente, via internet."}, {"q": "Um pendrive USB é um tipo de:", "opts": ["Dispositivo de armazenamento portátil", "Software de segurança", "Sistema operacional"], "correct": 0, "exp": "O pendrive USB é um dispositivo físico usado para armazenar e transportar arquivos."}, {"q": "A memória RAM é utilizada para:", "opts": ["Armazenamento permanente de arquivos", "Memória de acesso rápido usada temporariamente pelo processador", "Impressão de documentos"], "correct": 1, "exp": "A RAM é uma memória de acesso rápido usada temporariamente durante o processamento."}, {"q": "O HD ou SSD do computador é responsável por:", "opts": ["Armazenar dados de forma permanente", "Processar cálculos matemáticos", "Exibir imagens na tela"], "correct": 0, "exp": "HD e SSD são responsáveis pelo armazenamento permanente de dados no computador."}, {"q": "Um antivírus serve para:", "opts": ["Aumentar a velocidade da internet", "Proteger o computador contra softwares maliciosos", "Criar apresentações de slides"], "correct": 1, "exp": "O antivírus protege o computador contra vírus e outros softwares maliciosos."}, {"q": "O atalho Ctrl + P geralmente serve para:", "opts": ["Imprimir um documento", "Copiar um texto", "Fechar um programa"], "correct": 0, "exp": "Ctrl+P abre a opção de impressão do documento aberto."}, {"q": "Um arquivo em formato PDF é:", "opts": ["Um formato de documento portátil, com layout fixo", "Um tipo de vírus de computador", "Um sistema operacional"], "correct": 0, "exp": "PDF é um formato de documento portátil que preserva a formatação em qualquer dispositivo."}, {"q": "A barra de tarefas do Windows exibe:", "opts": ["Programas abertos e atalhos", "Apenas a hora do sistema", "Somente o papel de parede"], "correct": 0, "exp": "A barra de tarefas exibe programas em execução, atalhos e outras informações do sistema."}, {"q": "O Wi-Fi é uma tecnologia de:", "opts": ["Conexão sem fio à internet", "Armazenamento de dados físico", "Impressão de documentos"], "correct": 0, "exp": "Wi-Fi é uma tecnologia de conexão sem fio à internet e a redes locais."}, {"q": "Fazer um 'backup' significa:", "opts": ["Apagar arquivos antigos", "Fazer uma cópia de segurança de dados", "Reiniciar o computador"], "correct": 1, "exp": "Backup é a cópia de segurança de arquivos e dados importantes."}, {"q": "Um firewall serve para:", "opts": ["Proteger a rede contra acessos não autorizados", "Aumentar a velocidade do processador", "Criar planilhas eletrônicas"], "correct": 0, "exp": "O firewall protege a rede e o sistema contra acessos não autorizados."}, {"q": "Atualizar o sistema operacional regularmente é importante para:", "opts": ["Corrigir falhas de segurança", "Deixar o computador mais lento sempre", "Apagar todos os arquivos salvos"], "correct": 0, "exp": "Atualizações do sistema operacional corrigem falhas de segurança e melhoram o desempenho."}, {"q": "Um e-mail corporativo geralmente usa um domínio:", "opts": ["Genérico e aleatório", "Da própria empresa", "Sempre gratuito e pessoal"], "correct": 1, "exp": "E-mails corporativos costumam usar o domínio próprio da empresa (ex: @empresa.com)."}, {"q": "Uma senha considerada forte deve conter:", "opts": ["Apenas letras minúsculas", "Letras, números e símbolos variados", "Somente números sequenciais"], "correct": 1, "exp": "Senhas fortes combinam letras maiúsculas, minúsculas, números e símbolos."}, {"q": "Um navegador de internet permite:", "opts": ["Acessar páginas da internet", "Editar planilhas eletrônicas apenas", "Formatar o disco rígido"], "correct": 0, "exp": "Navegadores são usados para acessar sites e páginas na internet."}, {"q": "Um 'driver' de dispositivo serve para:", "opts": ["Permitir que o sistema operacional se comunique com o hardware", "Substituir o sistema operacional", "Aumentar a resolução da tela automaticamente"], "correct": 0, "exp": "Drivers permitem a comunicação entre o sistema operacional e os dispositivos de hardware."}, {"q": "O atalho Ctrl + A geralmente serve para:", "opts": ["Selecionar todo o conteúdo", "Abrir um novo arquivo", "Fechar o programa atual"], "correct": 0, "exp": "Ctrl+A seleciona todo o conteúdo de um documento ou tela."}, {"q": "Uma planilha eletrônica organiza dados em:", "opts": ["Linhas e colunas", "Apenas parágrafos de texto", "Slides sequenciais"], "correct": 0, "exp": "Planilhas eletrônicas organizam informações em linhas e colunas, formando células."}, {"q": "O Google Drive é um exemplo de:", "opts": ["Armazenamento em nuvem", "Sistema operacional", "Impressora multifuncional"], "correct": 0, "exp": "O Google Drive é um serviço de armazenamento e compartilhamento de arquivos em nuvem."}, {"q": "As atualizações de segurança do sistema devem ser:", "opts": ["Ignoradas sempre que possível", "Instaladas regularmente", "Desinstaladas assim que aparecem"], "correct": 1, "exp": "Atualizações de segurança devem ser instaladas regularmente para proteger o sistema."}, {"q": "O atalho Ctrl + F em programas de computador geralmente serve para:", "opts": ["Localizar uma palavra ou termo dentro do documento", "Formatar o texto selecionado em negrito", "Fechar o programa em uso"], "correct": 0, "exp": "Ctrl+F abre a ferramenta de busca, permitindo localizar rapidamente um termo dentro do documento."}, {"q": "Um arquivo compactado no formato .zip tem como principal função:", "opts": ["Reduzir o tamanho de um ou mais arquivos para armazenamento ou envio", "Aumentar a resolução de imagens automaticamente", "Proteger o arquivo contra qualquer tipo de vírus"], "correct": 0, "exp": "Arquivos .zip compactam dados, reduzindo o espaço necessário para armazenamento ou envio."}, {"q": "A diferença entre hardware e software está, principalmente, em:", "opts": ["Hardware é a parte física do computador; software são os programas", "Hardware e software serem sinônimos exatos", "Software ser sempre um componente físico do computador"], "correct": 0, "exp": "Hardware refere-se aos componentes físicos do computador, enquanto software são os programas e sistemas executados nele."}]}, {"id": 8, "track": "op", "name": "Fundamentos de Dados e Inteligência Artificial", "hours": 48, "questions": [{"q": "Um 'dado bruto' é:", "opts": ["Informação já analisada e organizada", "Informação coletada sem tratamento ou análise", "Um relatório gerencial final"], "correct": 1, "exp": "Dado bruto é a informação coletada na origem, ainda sem tratamento ou análise."}, {"q": "A Inteligência Artificial é, de forma geral, a capacidade de sistemas de:", "opts": ["Armazenar energia elétrica com mais eficiência", "Simular processos de raciocínio humano para resolver tarefas", "Substituir por completo a necessidade de dados"], "correct": 1, "exp": "IA refere-se a sistemas capazes de simular capacidades cognitivas humanas para resolver problemas."}, {"q": "Machine Learning (aprendizado de máquina) é:", "opts": ["Um tipo de hardware específico", "Aprendizado de máquina a partir de dados", "Uma linguagem de programação exclusiva"], "correct": 1, "exp": "Machine Learning é a capacidade de sistemas aprenderem padrões a partir de dados."}, {"q": "Um 'dataset' é:", "opts": ["Um conjunto organizado de dados", "Um tipo de vírus de computador", "Um programa de edição de imagens"], "correct": 0, "exp": "Dataset é um conjunto estruturado de dados usado para análise ou treinamento de modelos."}, {"q": "Um dado estruturado é aquele que está:", "opts": ["Organizado em tabelas, linhas e colunas", "Em formato de texto totalmente livre", "Sempre em formato de imagem"], "correct": 0, "exp": "Dados estruturados seguem um formato organizado, como tabelas com linhas e colunas."}, {"q": "Um dado não estruturado é aquele que está:", "opts": ["Organizado em tabelas fixas", "Sem formato organizado, como texto livre, imagem ou vídeo", "Sempre limitado a números"], "correct": 1, "exp": "Dados não estruturados não seguem um formato fixo, como textos livres, imagens e vídeos."}, {"q": "A sigla ETL refere-se a:", "opts": ["Extração, Transformação e Carga de dados", "Envio, Trânsito e Liberação de arquivos", "Entrada, Teste e Liberação de sistemas"], "correct": 0, "exp": "ETL (Extract, Transform, Load) é o processo de extrair, transformar e carregar dados."}, {"q": "A qualidade dos dados afeta diretamente:", "opts": ["A confiabilidade das análises realizadas", "Apenas a estética dos relatórios", "O tamanho do arquivo salvo"], "correct": 0, "exp": "Dados de baixa qualidade comprometem a confiabilidade de qualquer análise realizada."}, {"q": "Um algoritmo é:", "opts": ["Uma sequência de passos para resolver um problema", "Um tipo de banco de dados", "Um dispositivo físico de armazenamento"], "correct": 0, "exp": "Algoritmo é uma sequência lógica e ordenada de passos para resolver um problema."}, {"q": "A IA generativa é capaz de:", "opts": ["Criar novos conteúdos, como textos e imagens", "Apenas armazenar dados sem processá-los", "Substituir toda a necessidade de internet"], "correct": 0, "exp": "IA generativa cria novos conteúdos originais, como textos, imagens e áudios."}, {"q": "O viés (bias) em modelos de IA pode ocorrer devido a:", "opts": ["Dados de treinamento não representativos", "Excesso de precisão dos dados", "Falta de qualquer dado utilizado"], "correct": 0, "exp": "Vieses em IA costumam surgir de dados de treinamento que não representam bem a realidade."}, {"q": "O conceito de Big Data é caracterizado principalmente por:", "opts": ["Volume, velocidade e variedade", "Apenas pelo volume de dados", "Exclusivamente pela velocidade de processamento"], "correct": 0, "exp": "Big Data é caracterizado pelos chamados 3 Vs: volume, velocidade e variedade dos dados."}, {"q": "Um modelo de Inteligência Artificial é treinado, geralmente, com:", "opts": ["Dados históricos", "Apenas suposições teóricas", "Nenhum tipo de dado"], "correct": 0, "exp": "Modelos de IA aprendem padrões a partir de dados históricos utilizados no treinamento."}, {"q": "No Brasil, a proteção de dados pessoais é regulada pela:", "opts": ["LGPD", "CLT", "ISO 9001"], "correct": 0, "exp": "A LGPD (Lei Geral de Proteção de Dados) regula o tratamento de dados pessoais no Brasil."}, {"q": "Um 'data lake' é utilizado para:", "opts": ["Armazenar grandes volumes de dados brutos, estruturados ou não", "Editar apresentações de slides", "Substituir o uso de planilhas eletrônicas"], "correct": 0, "exp": "Data lake é um repositório que armazena grandes volumes de dados em seu formato bruto."}, {"q": "Um 'data warehouse' é:", "opts": ["Um repositório organizado de dados voltado à análise", "Um tipo de vírus de sistema", "Uma ferramenta de edição de imagens"], "correct": 0, "exp": "Data warehouse é um repositório estruturado e organizado, voltado à análise de dados."}, {"q": "Um chatbot baseado em IA é um exemplo de aplicação de:", "opts": ["Processamento de linguagem natural", "Manutenção mecânica de máquinas", "Contabilidade financeira"], "correct": 0, "exp": "Chatbots utilizam processamento de linguagem natural para interpretar e responder mensagens."}, {"q": "A análise preditiva utiliza dados para:", "opts": ["Prever tendências futuras", "Apagar registros antigos automaticamente", "Substituir toda tomada de decisão humana"], "correct": 0, "exp": "Análise preditiva usa dados históricos para estimar tendências e comportamentos futuros."}, {"q": "A governança de dados trata, principalmente, de:", "opts": ["Políticas e responsabilidades sobre o uso de dados", "Apenas o design visual dos relatórios", "A velocidade da internet da empresa"], "correct": 0, "exp": "Governança de dados define políticas, papéis e responsabilidades sobre o uso e proteção dos dados."}, {"q": "Um dado duplicado ou incorreto é frequentemente chamado de:", "opts": ["Dado sujo (dirty data)", "Dado estruturado", "Dado seguro"], "correct": 0, "exp": "Dados incorretos, duplicados ou incompletos são chamados de 'dados sujos'."}, {"q": "A limpeza de dados (data cleaning) serve para:", "opts": ["Corrigir e padronizar dados", "Aumentar propositalmente os erros nos dados", "Eliminar toda a base de dados"], "correct": 0, "exp": "A limpeza de dados corrige inconsistências e padroniza as informações antes da análise."}, {"q": "Na aprendizagem supervisionada, o modelo de IA aprende com:", "opts": ["Dados rotulados/classificados previamente", "Nenhum tipo de dado", "Apenas imagens sem qualquer rótulo"], "correct": 0, "exp": "Aprendizagem supervisionada usa dados já rotulados para treinar o modelo."}, {"q": "Na aprendizagem não supervisionada, o modelo busca:", "opts": ["Padrões em dados sem rótulos prévios", "Seguir apenas regras fixas predefinidas", "Ignorar todos os dados disponíveis"], "correct": 0, "exp": "Na aprendizagem não supervisionada, o modelo identifica padrões sem rótulos previamente definidos."}, {"q": "O Deep Learning utiliza principalmente:", "opts": ["Redes neurais artificiais", "Apenas planilhas eletrônicas", "Circuitos elétricos analógicos simples"], "correct": 0, "exp": "Deep Learning é baseado em redes neurais artificiais com múltiplas camadas."}, {"q": "Um KPI baseado em dados ajuda a:", "opts": ["Medir o desempenho de forma objetiva", "Substituir toda a estratégia da empresa", "Eliminar a necessidade de metas"], "correct": 0, "exp": "KPIs baseados em dados permitem medir objetivamente o desempenho em relação a metas."}, {"q": "Data mining é o processo de:", "opts": ["Descobrir padrões em grandes conjuntos de dados", "Apagar dados desnecessários apenas", "Criar apresentações visuais simples"], "correct": 0, "exp": "Data mining busca descobrir padrões úteis e não óbvios em grandes volumes de dados."}, {"q": "Uma API pode ser usada para:", "opts": ["Integrar sistemas e trocar dados entre eles", "Substituir toda a necessidade de bancos de dados", "Impedir a comunicação entre sistemas"], "correct": 0, "exp": "APIs permitem que diferentes sistemas se comuniquem e troquem dados entre si."}, {"q": "A ética em Inteligência Artificial envolve:", "opts": ["Uso responsável e transparente dos dados e modelos", "Ignorar completamente os impactos sociais", "Priorizar apenas o lucro, sem outras considerações"], "correct": 0, "exp": "Ética em IA envolve responsabilidade, transparência e cuidado com os impactos do uso da tecnologia."}, {"q": "A automação com IA pode, principalmente:", "opts": ["Substituir tarefas repetitivas e baseadas em regras", "Eliminar toda necessidade de supervisão humana", "Aumentar apenas a burocracia dos processos"], "correct": 0, "exp": "IA pode automatizar tarefas repetitivas e baseadas em regras claras, liberando tempo humano."}, {"q": "Um dos riscos do uso de Inteligência Artificial é:", "opts": ["Reforçar vieses presentes nos dados de treinamento", "Eliminar automaticamente qualquer erro", "Garantir resultados sempre perfeitos"], "correct": 0, "exp": "Se os dados de treinamento contêm vieses, o modelo de IA pode reforçá-los em suas decisões."}, {"q": "O overfitting, em um modelo de Inteligência Artificial, ocorre quando o modelo:", "opts": ["Se ajusta excessivamente aos dados de treino, perdendo capacidade de generalizar", "Aprende de forma equilibrada, generalizando bem para novos dados", "Não consegue aprender nenhum padrão a partir dos dados"], "correct": 0, "exp": "Overfitting ocorre quando o modelo memoriza os dados de treino, perdendo a capacidade de generalizar para novos casos."}, {"q": "Um hiperparâmetro, em Machine Learning, é:", "opts": ["Uma configuração definida antes do treinamento do modelo", "Um dado de saída gerado automaticamente pelo modelo", "Um tipo específico de gráfico de resultados"], "correct": 0, "exp": "Hiperparâmetros são configurações definidas antes do treinamento, que influenciam como o modelo aprende."}, {"q": "A divisão de dados em conjuntos de treino e teste tem como objetivo, principalmente:", "opts": ["Avaliar a capacidade do modelo de generalizar para dados novos", "Aumentar artificialmente a precisão do modelo", "Eliminar a necessidade de qualquer avaliação posterior"], "correct": 0, "exp": "Separar dados em treino e teste permite avaliar se o modelo generaliza bem para dados que não viu antes."}, {"q": "O viés de confirmação, ao analisar dados, refere-se, principalmente, a:", "opts": ["Tendência de buscar informações que confirmem uma crença prévia", "Um tipo específico de algoritmo de Machine Learning", "Um erro exclusivamente técnico de programação"], "correct": 0, "exp": "Viés de confirmação é a tendência humana de buscar e valorizar dados que confirmem crenças já existentes."}]}, {"id": 9, "track": "esp", "name": "Fundamentos de Gestão da Qualidade, KPI e OKR", "hours": 32, "questions": [{"q": "A sigla KPI significa:", "opts": ["Key Performance Indicator (indicador-chave de desempenho)", "Key Process Innovation", "Known Product Information"], "correct": 0, "exp": "KPI é um indicador-chave usado para medir o desempenho de um processo ou objetivo."}, {"q": "A metodologia OKR é usada para:", "opts": ["Calcular impostos da empresa", "Definir objetivos e resultados-chave mensuráveis", "Cadastrar clientes no sistema"], "correct": 1, "exp": "OKR (Objectives and Key Results) define objetivos claros com resultados-chave mensuráveis."}, {"q": "O ciclo PDCA é composto pelas etapas:", "opts": ["Planejar, Fazer (Do), Checar e Agir", "Produzir, Distribuir, Cobrar e Avaliar", "Pensar, Discutir, Concluir e Arquivar"], "correct": 0, "exp": "PDCA representa Plan (Planejar), Do (Fazer), Check (Checar) e Act (Agir)."}, {"q": "A gestão da qualidade total busca, principalmente:", "opts": ["A satisfação do cliente em todos os processos", "Reduzir apenas os custos, ignorando a satisfação", "Eliminar completamente os controles de processo"], "correct": 0, "exp": "A qualidade total busca a satisfação do cliente por meio da melhoria contínua de todos os processos."}, {"q": "A norma ISO 9001 é uma norma de:", "opts": ["Gestão da qualidade", "Segurança da informação", "Sustentabilidade ambiental"], "correct": 0, "exp": "A ISO 9001 estabelece requisitos para um sistema de gestão da qualidade."}, {"q": "Um indicador de qualidade mede:", "opts": ["O desempenho de um processo em relação a uma meta", "Apenas a opinião pessoal do gestor", "O tamanho da empresa"], "correct": 0, "exp": "Indicadores de qualidade medem objetivamente o desempenho de um processo frente a uma meta."}, {"q": "A melhoria contínua (Kaizen) busca:", "opts": ["Pequenas melhorias constantes nos processos", "Grandes mudanças únicas e raras", "Manter os processos sempre inalterados"], "correct": 0, "exp": "Kaizen é a filosofia de buscar pequenas melhorias contínuas nos processos."}, {"q": "Um 'resultado-chave' (Key Result) no OKR deve ser, principalmente:", "opts": ["Vago e sem prazo", "Mensurável", "Impossível de acompanhar"], "correct": 1, "exp": "Resultados-chave no OKR precisam ser mensuráveis para permitir o acompanhamento do progresso."}, {"q": "Uma 'não conformidade' em gestão da qualidade é:", "opts": ["Um desvio em relação ao padrão esperado", "Um resultado sempre positivo", "Uma meta alcançada com sucesso"], "correct": 0, "exp": "Não conformidade é qualquer desvio em relação ao padrão ou requisito estabelecido."}, {"q": "Uma auditoria de qualidade serve para:", "opts": ["Verificar conformidade com padrões estabelecidos", "Aumentar os custos sem necessidade", "Eliminar todos os controles do processo"], "correct": 0, "exp": "Auditorias de qualidade verificam se os processos estão em conformidade com os padrões definidos."}, {"q": "O 'cliente interno' é:", "opts": ["Um colaborador que depende do trabalho de outro setor", "Sempre um cliente externo da empresa", "Um fornecedor externo"], "correct": 0, "exp": "Cliente interno é o colaborador ou setor que depende do resultado do trabalho de outra área."}, {"q": "Uma certificação de qualidade traz como benefício:", "opts": ["Credibilidade e padronização dos processos", "Aumento da desorganização interna", "Redução da confiança dos clientes"], "correct": 0, "exp": "Certificações de qualidade aumentam a credibilidade da empresa e padronizam seus processos."}, {"q": "Um indicador de eficiência mede:", "opts": ["O uso de recursos em relação ao resultado obtido", "Apenas a quantidade de funcionários", "O tamanho do escritório"], "correct": 0, "exp": "Eficiência relaciona os recursos utilizados com os resultados alcançados em um processo."}, {"q": "Os ciclos de OKR geralmente são definidos em períodos de:", "opts": ["Um dia", "Um trimestre", "Dez anos"], "correct": 1, "exp": "OKRs costumam ser definidos e revisados em ciclos trimestrais."}, {"q": "A gestão da qualidade envolve:", "opts": ["Planejamento, controle e melhoria", "Apenas a inspeção final do produto", "Somente a opinião do cliente"], "correct": 0, "exp": "Gestão da qualidade envolve planejamento, controle e melhoria contínua dos processos."}, {"q": "Um exemplo de KPI de vendas pode ser:", "opts": ["Número de vendas fechadas no mês", "A cor do logotipo da empresa", "O nome do vendedor"], "correct": 0, "exp": "Um KPI de vendas comum é o número de vendas fechadas em determinado período."}, {"q": "Uma meta ambiciosa (moonshot) no OKR busca:", "opts": ["Estimular resultados extraordinários", "Garantir metas fáceis de bater", "Eliminar qualquer desafio da equipe"], "correct": 0, "exp": "Metas moonshot buscam estimular a equipe a alcançar resultados extraordinários, além do usual."}, {"q": "A ferramenta 5W2H ajuda a:", "opts": ["Planejar ações de forma detalhada", "Calcular impostos da empresa", "Substituir toda comunicação escrita"], "correct": 0, "exp": "5W2H é uma ferramenta que detalha ações respondendo perguntas como o quê, por quê, como e quanto."}, {"q": "O Diagrama de Ishikawa (espinha de peixe) é usado para:", "opts": ["Identificar as causas de um problema", "Calcular a média de vendas", "Desenhar apresentações visuais"], "correct": 0, "exp": "O Diagrama de Ishikawa ajuda a identificar possíveis causas raízes de um problema."}, {"q": "Um dashboard de KPIs serve para:", "opts": ["Visualizar indicadores de desempenho", "Armazenar arquivos administrativos", "Substituir toda comunicação da equipe"], "correct": 0, "exp": "Dashboards de KPIs permitem visualizar de forma rápida os indicadores de desempenho."}, {"q": "A padronização de processos ajuda a:", "opts": ["Reduzir variabilidade e erros", "Aumentar a imprevisibilidade dos resultados", "Eliminar qualquer controle de qualidade"], "correct": 0, "exp": "Padronizar processos reduz a variabilidade e diminui a ocorrência de erros."}, {"q": "O ciclo de feedback em OKR serve para:", "opts": ["Ajustar o rumo e reconhecer o progresso", "Eliminar toda comunicação entre gestor e equipe", "Impedir qualquer ajuste nas metas"], "correct": 0, "exp": "O feedback contínuo em OKR permite ajustar o rumo das ações e reconhecer avanços."}, {"q": "O indicador de qualidade 'taxa de retrabalho' mede:", "opts": ["Quanto trabalho precisou ser refeito", "O número total de funcionários", "O valor investido em marketing"], "correct": 0, "exp": "A taxa de retrabalho indica a proporção de tarefas que precisaram ser refeitas por erros."}, {"q": "A gestão por indicadores permite:", "opts": ["Tomar decisões baseadas em dados", "Tomar decisões apenas por intuição", "Ignorar completamente os resultados obtidos"], "correct": 0, "exp": "Gestão por indicadores fundamenta as decisões em dados objetivos e mensuráveis."}, {"q": "O benchmarking consiste em:", "opts": ["Comparar processos com referências de mercado", "Ignorar completamente a concorrência", "Reduzir a qualidade dos processos internos"], "correct": 0, "exp": "Benchmarking é a prática de comparar processos e resultados com referências do mercado."}, {"q": "A satisfação do cliente pode ser medida, por exemplo, por meio de:", "opts": ["Pesquisas como o NPS", "Apenas pela intuição do gestor", "Pelo tamanho da empresa"], "correct": 0, "exp": "Pesquisas como o NPS (Net Promoter Score) medem objetivamente a satisfação dos clientes."}, {"q": "Um objetivo, dentro da metodologia OKR, deve ser:", "opts": ["Qualitativo e inspirador", "Sempre numérico e frio", "Impossível de ser comunicado à equipe"], "correct": 0, "exp": "No OKR, o Objetivo costuma ser qualitativo e inspirador, enquanto os Resultados-Chave são mensuráveis."}, {"q": "A metodologia 5S está relacionada a:", "opts": ["Organização e qualidade no ambiente de trabalho", "Cálculo de impostos empresariais", "Gestão financeira de longo prazo"], "correct": 0, "exp": "O 5S é uma metodologia de organização e qualidade aplicada ao ambiente de trabalho."}, {"q": "O controle de qualidade atua, principalmente:", "opts": ["Durante e após o processo produtivo", "Apenas antes do início da produção", "Somente após a reclamação do cliente"], "correct": 0, "exp": "O controle de qualidade acompanha o processo durante e após sua execução."}, {"q": "Um dos objetivos de se utilizar KPIs é:", "opts": ["Alinhar a equipe às metas da organização", "Aumentar a desorganização da equipe", "Eliminar qualquer forma de acompanhamento"], "correct": 0, "exp": "KPIs ajudam a alinhar os esforços da equipe às metas estratégicas da organização."}, {"q": "O ciclo de vida de um produto inclui, entre outras etapas:", "opts": ["Introdução, crescimento, maturidade e declínio", "Apenas a etapa de produção industrial", "Somente a etapa de descarte final do produto"], "correct": 0, "exp": "O ciclo de vida de um produto passa por introdução, crescimento, maturidade e declínio no mercado."}, {"q": "A metodologia Six Sigma tem como principal foco:", "opts": ["Reduzir a variabilidade e os defeitos em processos", "Aumentar propositalmente a variabilidade dos processos", "Eliminar completamente a necessidade de indicadores"], "correct": 0, "exp": "Six Sigma busca reduzir a variabilidade e os defeitos em processos, aumentando a qualidade e a previsibilidade."}, {"q": "Um SLA (Service Level Agreement) define, principalmente:", "opts": ["O nível de serviço acordado entre as partes envolvidas", "O valor total investido em um projeto", "Apenas o nome do responsável pelo serviço prestado"], "correct": 0, "exp": "SLA é um acordo que formaliza o nível de serviço esperado entre um prestador e seu cliente."}]}, {"id": 10, "track": "esp", "name": "Apresentação Gerencial com Canva", "hours": 24, "questions": [{"q": "O Canva é uma ferramenta usada principalmente para:", "opts": ["Programação de sistemas", "Criação de designs e apresentações visuais", "Gestão financeira de empresas"], "correct": 1, "exp": "O Canva é uma plataforma de design gráfico para criar apresentações, banners e materiais visuais."}, {"q": "Uma apresentação gerencial eficaz deve priorizar:", "opts": ["Textos longos e densos em cada slide", "Poucos elementos visuais, mensagem clara e dados em destaque", "Cores aleatórias sem nenhum padrão"], "correct": 1, "exp": "Apresentações eficazes usam poucos elementos, mensagem objetiva e destacam dados relevantes."}, {"q": "A paleta de cores em um design serve para:", "opts": ["Manter identidade visual e legibilidade", "Aumentar a confusão visual do público", "Substituir todo o conteúdo textual"], "correct": 0, "exp": "A paleta de cores contribui para a identidade visual e a legibilidade do material."}, {"q": "O contraste entre texto e fundo é importante para:", "opts": ["A legibilidade do conteúdo", "Diminuir a atenção do público", "Aumentar o tempo de leitura desnecessariamente"], "correct": 0, "exp": "Bom contraste entre texto e fundo é essencial para garantir a legibilidade."}, {"q": "Os templates do Canva ajudam a:", "opts": ["Agilizar a criação de designs", "Impedir qualquer personalização", "Substituir a necessidade de conteúdo"], "correct": 0, "exp": "Templates agilizam a criação de designs, servindo como ponto de partida personalizável."}, {"q": "A hierarquia visual em um slide indica:", "opts": ["A ordem de importância das informações", "Apenas a data de criação do slide", "O nome do autor do documento"], "correct": 0, "exp": "Hierarquia visual orienta o olhar do público para o que é mais importante primeiro."}, {"q": "As fontes (tipografia) utilizadas devem ser:", "opts": ["Legíveis e consistentes ao longo da apresentação", "Diferentes em cada slide, sem padrão", "Sempre em letras maiúsculas"], "correct": 0, "exp": "Fontes legíveis e consistentes ajudam na leitura e na identidade visual da apresentação."}, {"q": "O excesso de texto em um slide pode:", "opts": ["Facilitar a compreensão da audiência", "Dificultar a compreensão da audiência", "Substituir a necessidade de falar durante a apresentação"], "correct": 1, "exp": "Excesso de texto em slides costuma dificultar, e não facilitar, a compreensão pela audiência."}, {"q": "Elementos gráficos, como ícones e imagens, ajudam a:", "opts": ["Tornar a informação mais visual e compreensível", "Confundir ainda mais o público", "Substituir totalmente os dados apresentados"], "correct": 0, "exp": "Ícones e imagens tornam a informação mais visual e fácil de compreender."}, {"q": "Um bom storytelling em apresentações:", "opts": ["Engaja e prende a atenção do público", "Torna a apresentação mais confusa", "É irrelevante para apresentações gerenciais"], "correct": 0, "exp": "Storytelling bem construído engaja o público e facilita a retenção da mensagem."}, {"q": "O slide de abertura de uma apresentação deve:", "opts": ["Apresentar o tema de forma clara e atrativa", "Conter todos os detalhes técnicos do projeto", "Ser o mais longo de toda a apresentação"], "correct": 0, "exp": "O slide de abertura deve introduzir o tema de forma clara e chamar a atenção do público."}, {"q": "No Canva, um design pode ser exportado, por exemplo, em formato:", "opts": ["PDF ou imagem", "Apenas em áudio", "Somente em vídeo sem imagem"], "correct": 0, "exp": "O Canva permite exportar designs em diversos formatos, como PDF e imagem."}, {"q": "O branding em uma apresentação corporativa deve:", "opts": ["Seguir a identidade visual da empresa", "Ignorar completamente a marca da empresa", "Usar cores aleatórias a cada apresentação"], "correct": 0, "exp": "O branding deve manter consistência com a identidade visual já estabelecida pela empresa."}, {"q": "Gráficos em uma apresentação servem para:", "opts": ["Tornar dados mais fáceis de entender", "Confundir a audiência com números soltos", "Substituir toda explicação verbal"], "correct": 0, "exp": "Gráficos tornam dados complexos mais fáceis de visualizar e compreender."}, {"q": "O alinhamento de elementos em um slide contribui para:", "opts": ["A organização visual do conteúdo", "O aumento da desordem visual", "A redução da legibilidade"], "correct": 0, "exp": "Elementos bem alinhados tornam o slide mais organizado e profissional."}, {"q": "O espaço em branco (whitespace) em um design serve para:", "opts": ["Dar respiro visual e destacar o conteúdo", "Ser sempre evitado a todo custo", "Aumentar a poluição visual"], "correct": 0, "exp": "O espaço em branco ajuda a destacar o conteúdo e evitar poluição visual."}, {"q": "Apresentações gerenciais costumam priorizar:", "opts": ["Dados e resultados de forma objetiva", "Textos longos e pouco objetivos", "Apenas opiniões pessoais sem dados"], "correct": 0, "exp": "Apresentações gerenciais focam em dados e resultados apresentados de forma objetiva."}, {"q": "Um 'kit de marca' no Canva geralmente contém:", "opts": ["Cores, fontes e logotipo padronizados", "Apenas um conjunto de imagens aleatórias", "Vídeos institucionais completos"], "correct": 0, "exp": "O kit de marca reúne elementos padronizados como cores, fontes e logotipo da empresa."}, {"q": "O slide de fechamento de uma apresentação deve:", "opts": ["Resumir os principais pontos e próximos passos", "Introduzir um assunto totalmente novo", "Ser idêntico ao slide de abertura"], "correct": 0, "exp": "O fechamento deve resumir os pontos principais e indicar os próximos passos."}, {"q": "Uma boa prática visual em apresentações é:", "opts": ["Manter consistência entre todos os slides", "Mudar completamente o estilo a cada slide", "Usar fontes diferentes em cada página"], "correct": 0, "exp": "Manter consistência visual entre os slides transmite profissionalismo e organização."}, {"q": "O uso excessivo de animações em slides pode:", "opts": ["Melhorar sempre a compreensão do conteúdo", "Distrair a audiência do conteúdo principal", "Substituir a necessidade de dados"], "correct": 1, "exp": "Animações em excesso tendem a distrair o público em vez de reforçar a mensagem."}, {"q": "Compartilhar um design colaborativo no Canva permite:", "opts": ["Edição em equipe simultânea", "Apenas visualização, sem qualquer edição", "Bloqueio total de qualquer alteração"], "correct": 0, "exp": "O Canva permite colaboração em tempo real entre membros da equipe em um mesmo design."}, {"q": "Redimensionar um design no Canva serve para:", "opts": ["Adaptar o conteúdo a diferentes formatos", "Apagar o conteúdo original", "Impedir qualquer exportação"], "correct": 0, "exp": "O redimensionamento adapta o mesmo design para diferentes formatos e finalidades."}, {"q": "Ícones em um dashboard visual ajudam a:", "opts": ["Comunicar informações rapidamente de forma visual", "Tornar a leitura mais lenta e confusa", "Substituir toda a análise de dados"], "correct": 0, "exp": "Ícones ajudam a comunicar informações de forma rápida e visualmente intuitiva."}, {"q": "Uma apresentação para diretoria deve ser, principalmente:", "opts": ["Objetiva, com foco em resultados e recomendações", "Extensa, com todos os detalhes operacionais", "Informal, sem qualquer estrutura"], "correct": 0, "exp": "Apresentações para diretoria devem ser objetivas, focadas em resultados e recomendações claras."}, {"q": "Elementos visuais desalinhados em um slide podem transmitir:", "opts": ["Falta de profissionalismo", "Maior credibilidade ao conteúdo", "Organização e cuidado no design"], "correct": 0, "exp": "Elementos desalinhados costumam transmitir falta de profissionalismo e cuidado no design."}, {"q": "Templates de relatório no Canva ajudam a:", "opts": ["Manter padronização visual em documentos", "Impedir qualquer atualização de conteúdo", "Aumentar a inconsistência visual"], "correct": 0, "exp": "Templates de relatório ajudam a manter a padronização visual entre diferentes documentos."}, {"q": "Um bom uso de imagens em apresentações é:", "opts": ["Relevante ao conteúdo e de boa qualidade", "Aleatório e sem relação com o tema", "Sempre em baixa resolução"], "correct": 0, "exp": "Imagens relevantes e de boa qualidade reforçam a mensagem sem distrair o público."}, {"q": "Ensaiar a apresentação antes de expor:", "opts": ["Melhora a fluência e a confiança na fala", "É desnecessário para apresentações curtas", "Deve ser evitado para parecer mais espontâneo"], "correct": 0, "exp": "Ensaiar previamente melhora a fluência, o tempo de fala e a confiança do apresentador."}, {"q": "Ao apresentar dados a um público executivo, é recomendável:", "opts": ["Usar gráficos simples e diretos", "Mostrar todas as planilhas originais sem tratamento", "Ler números em voz alta sem qualquer visual"], "correct": 0, "exp": "Gráficos simples e diretos facilitam a compreensão rápida por públicos executivos."}, {"q": "A hierarquia tipográfica em um slide organiza, principalmente:", "opts": ["O tamanho e peso das fontes conforme a importância da informação", "Apenas a cor de fundo utilizada no slide", "Somente o alinhamento dos elementos gráficos"], "correct": 0, "exp": "Hierarquia tipográfica usa tamanho e peso das fontes para indicar a importância relativa das informações."}, {"q": "Exportar uma apresentação em formato de vídeo pode ser útil, principalmente, para:", "opts": ["Compartilhar o conteúdo sem depender de apresentação ao vivo", "Substituir totalmente qualquer apresentação presencial", "Eliminar a necessidade de qualquer edição futura"], "correct": 0, "exp": "Exportar em vídeo permite compartilhar o conteúdo de forma independente, sem exigir uma apresentação ao vivo."}, {"q": "Reutilizar um kit de marca (brand kit) em diferentes materiais contribui, principalmente, para:", "opts": ["Manter consistência visual entre diferentes peças de comunicação", "Aumentar a variação de estilos entre os materiais", "Eliminar a necessidade de qualquer identidade visual"], "correct": 0, "exp": "Reutilizar o kit de marca mantém a consistência visual entre diferentes materiais de comunicação da empresa."}]}, {"id": 11, "track": "esp", "name": "Processos Administrativos e Sistemas de Gestão Empresarial", "hours": 40, "questions": [{"q": "A sigla ERP se refere a:", "opts": ["Enterprise Resource Planning — sistema integrado de gestão", "Easy Report Production", "External Resource Provider"], "correct": 0, "exp": "ERP (Enterprise Resource Planning) é um sistema que integra diferentes áreas da empresa."}, {"q": "Um processo administrativo bem definido tem como objetivo principal:", "opts": ["Padronizar e dar previsibilidade às atividades", "Tornar as tarefas mais confusas", "Eliminar todo tipo de controle"], "correct": 0, "exp": "Processos bem definidos padronizam o trabalho e tornam os resultados mais previsíveis."}, {"q": "Um fluxograma de processo serve para:", "opts": ["Representar visualmente as etapas de um processo", "Substituir toda documentação escrita", "Calcular indicadores financeiros"], "correct": 0, "exp": "Fluxogramas representam visualmente as etapas e a sequência de um processo."}, {"q": "Um sistema CRM é usado, principalmente, para:", "opts": ["Gestão de relacionamento com clientes", "Controle exclusivo de estoque", "Gestão de folha de pagamento"], "correct": 0, "exp": "CRM (Customer Relationship Management) gerencia o relacionamento da empresa com seus clientes."}, {"q": "Um processo administrativo eficiente tende a reduzir:", "opts": ["Retrabalho e erros", "A satisfação dos clientes", "A produtividade da equipe"], "correct": 0, "exp": "Processos eficientes reduzem retrabalho e erros ao longo da execução das tarefas."}, {"q": "O setor de compras é responsável, principalmente, por:", "opts": ["Aquisição de produtos e serviços para a empresa", "Contratação exclusiva de novos funcionários", "Gestão da folha de pagamento"], "correct": 0, "exp": "O setor de compras cuida da aquisição de produtos e serviços necessários à empresa."}, {"q": "A gestão de estoque busca, principalmente:", "opts": ["Equilibrar disponibilidade de produtos e custos", "Maximizar o estoque parado, sem controle", "Eliminar totalmente o controle de produtos"], "correct": 0, "exp": "Gestão de estoque busca equilibrar a disponibilidade de produtos com os custos de armazenagem."}, {"q": "Um manual de processos serve para:", "opts": ["Padronizar e orientar a execução das tarefas", "Substituir toda comunicação da equipe", "Aumentar a informalidade dos processos"], "correct": 0, "exp": "Manuais de processos orientam e padronizam a forma correta de executar as tarefas."}, {"q": "Arquivos físicos e digitais devem ser, preferencialmente:", "opts": ["Organizados para fácil localização", "Deixados sem qualquer padrão de organização", "Descartados sem qualquer critério"], "correct": 0, "exp": "Uma boa organização de arquivos facilita a localização rápida de documentos."}, {"q": "Um sistema integrado de gestão une:", "opts": ["Informações de diferentes setores da empresa", "Apenas informações do setor financeiro", "Somente dados de clientes externos"], "correct": 0, "exp": "Sistemas integrados de gestão unificam informações de várias áreas da empresa em uma plataforma."}, {"q": "A rotina administrativa geralmente inclui:", "opts": ["Controle de documentos, agendamentos e comunicações", "Apenas a produção de bens físicos", "Somente atividades de vendas externas"], "correct": 0, "exp": "A rotina administrativa envolve controle de documentos, agendas e comunicações internas."}, {"q": "Um protocolo de documentos serve para:", "opts": ["Registrar entrada e saída de documentos", "Substituir toda comunicação verbal", "Eliminar a necessidade de arquivamento"], "correct": 0, "exp": "O protocolo registra formalmente a entrada e a saída de documentos na organização."}, {"q": "A gestão de contratos envolve, principalmente:", "opts": ["Acompanhamento de prazos e cláusulas contratuais", "Apenas a assinatura inicial do contrato", "Ignorar prazos e condições estabelecidas"], "correct": 0, "exp": "Gestão de contratos acompanha prazos, cláusulas e obrigações ao longo da vigência do contrato."}, {"q": "Um indicador administrativo pode ser, por exemplo:", "opts": ["Tempo médio de atendimento", "A cor do uniforme da equipe", "O nome do gestor responsável"], "correct": 0, "exp": "O tempo médio de atendimento é um exemplo comum de indicador administrativo."}, {"q": "A terceirização de processos administrativos geralmente visa:", "opts": ["Focar em atividades estratégicas do negócio", "Aumentar a complexidade de todos os processos", "Eliminar qualquer controle de qualidade"], "correct": 0, "exp": "Terceirizar processos não estratégicos permite focar esforços internos no core business."}, {"q": "A auditoria interna verifica, principalmente:", "opts": ["Conformidade dos processos com normas e políticas", "Apenas o clima organizacional", "A quantidade de café consumido no escritório"], "correct": 0, "exp": "Auditorias internas verificam se os processos seguem as normas e políticas estabelecidas."}, {"q": "Um dos objetivos da gestão de processos é:", "opts": ["Aumentar eficiência e reduzir custos", "Aumentar a burocracia sem necessidade", "Eliminar toda forma de padronização"], "correct": 0, "exp": "A gestão de processos busca aumentar a eficiência e reduzir custos operacionais."}, {"q": "Um sistema de gestão de documentos (GED) permite:", "opts": ["Digitalizar e organizar documentos", "Apagar documentos automaticamente sem controle", "Substituir toda comunicação da empresa"], "correct": 0, "exp": "O GED digitaliza, organiza e facilita o acesso a documentos da organização."}, {"q": "O fluxo de caixa administrativo controla:", "opts": ["Entradas e saídas financeiras da empresa", "Apenas o número de funcionários", "A quantidade de produtos fabricados"], "correct": 0, "exp": "O fluxo de caixa controla as entradas e saídas financeiras ao longo do tempo."}, {"q": "O mapeamento de processos (BPM) ajuda a:", "opts": ["Identificar gargalos e oportunidades de melhoria", "Aumentar a desorganização dos processos", "Eliminar qualquer indicador de desempenho"], "correct": 0, "exp": "BPM (mapeamento de processos de negócio) ajuda a identificar gargalos e pontos de melhoria."}, {"q": "A gestão de contratos com fornecedores exige:", "opts": ["Acompanhamento de entregas e prazos", "Ignorar completamente os prazos combinados", "Ausência total de comunicação com o fornecedor"], "correct": 0, "exp": "A gestão de fornecedores exige acompanhamento constante de entregas e prazos contratuais."}, {"q": "A centralização de processos administrativos pode ajudar a:", "opts": ["Padronizar decisões", "Aumentar a inconsistência de decisões", "Eliminar qualquer controle central"], "correct": 0, "exp": "A centralização tende a padronizar decisões e processos em toda a organização."}, {"q": "A descentralização de processos administrativos pode:", "opts": ["Agilizar decisões locais", "Eliminar toda autonomia das unidades", "Impedir qualquer tomada de decisão"], "correct": 0, "exp": "A descentralização permite maior agilidade em decisões tomadas localmente."}, {"q": "Rotinas de backup de dados administrativos evitam, principalmente:", "opts": ["A perda de informações importantes", "O aumento da produtividade", "A padronização dos processos"], "correct": 0, "exp": "Backups regulares evitam a perda de dados e informações administrativas importantes."}, {"q": "Um organograma representa:", "opts": ["A estrutura hierárquica da empresa", "O fluxo de caixa da organização", "O cronograma de um projeto específico"], "correct": 0, "exp": "O organograma representa visualmente a estrutura hierárquica e os setores da empresa."}, {"q": "A gestão à vista (quadros de indicadores) ajuda a:", "opts": ["Acompanhar processos em tempo real", "Esconder informações da equipe", "Eliminar qualquer forma de indicador"], "correct": 0, "exp": "Gestão à vista expõe indicadores de forma visível, facilitando o acompanhamento em tempo real."}, {"q": "Sistemas ERP costumam integrar, entre outras áreas:", "opts": ["Financeiro, estoque e recursos humanos", "Apenas o setor de limpeza", "Somente o setor de marketing externo"], "correct": 0, "exp": "ERPs integram diversas áreas da empresa, como financeiro, estoque e recursos humanos."}, {"q": "Um checklist administrativo serve para:", "opts": ["Garantir que etapas não sejam esquecidas", "Aumentar a chance de erros no processo", "Substituir toda supervisão da equipe"], "correct": 0, "exp": "Checklists ajudam a garantir que nenhuma etapa importante do processo seja esquecida."}, {"q": "A gestão de qualidade nos processos administrativos busca:", "opts": ["Reduzir erros e retrabalho", "Aumentar a burocracia sem necessidade", "Eliminar toda forma de controle"], "correct": 0, "exp": "A gestão de qualidade nos processos administrativos busca reduzir erros e retrabalho."}, {"q": "A digitalização de processos administrativos contribui para:", "opts": ["Agilidade e sustentabilidade, com menos uso de papel", "Aumento do uso de papel físico", "Redução da agilidade dos processos"], "correct": 0, "exp": "Digitalizar processos aumenta a agilidade e reduz o uso de papel, contribuindo com a sustentabilidade."}, {"q": "A principal diferença entre um CRM e um ERP está em:", "opts": ["O CRM foca no relacionamento com clientes; o ERP integra processos internos", "Serem sistemas idênticos, com funções exatamente iguais", "O ERP ser usado apenas por pequenas empresas"], "correct": 0, "exp": "CRM foca na gestão do relacionamento com clientes, enquanto ERP integra processos e áreas internas da empresa."}, {"q": "A gestão à vista em processos administrativos consiste em:", "opts": ["Expor indicadores de forma visível para toda a equipe", "Restringir o acesso a indicadores apenas à diretoria", "Eliminar a necessidade de qualquer indicador de desempenho"], "correct": 0, "exp": "Gestão à vista expõe indicadores de forma visível, facilitando o acompanhamento por toda a equipe."}, {"q": "Um fluxo de aprovação bem definido em processos administrativos contribui, principalmente, para:", "opts": ["Garantir controle e rastreabilidade das decisões tomadas", "Aumentar desnecessariamente a burocracia sem qualquer benefício", "Eliminar a necessidade de qualquer responsável pela decisão"], "correct": 0, "exp": "Fluxos de aprovação bem definidos garantem controle e rastreabilidade sobre as decisões tomadas na empresa."}, {"q": "A governança corporativa está relacionada, principalmente, a:", "opts": ["Práticas que orientam a gestão e o controle de uma organização", "Apenas ao departamento de marketing da empresa", "Somente a decisões operacionais do dia a dia"], "correct": 0, "exp": "Governança corporativa reúne práticas e princípios que orientam a gestão e o controle de uma organização."}]}, {"id": 12, "track": "esp", "name": "Análise de Dados com Planilhas Eletrônicas", "hours": 40, "questions": [{"q": "Qual função do Excel soma os valores de um intervalo de células?", "opts": ["=MÉDIA()", "=SOMA()", "=CONT.SE()"], "correct": 1, "exp": "A função =SOMA() adiciona todos os valores de um intervalo selecionado."}, {"q": "Uma tabela dinâmica (pivot table) serve principalmente para:", "opts": ["Formatar texto em negrito", "Resumir e cruzar grandes volumes de dados", "Desenhar gráficos vetoriais livres"], "correct": 1, "exp": "Tabelas dinâmicas resumem, agrupam e cruzam dados de forma rápida e flexível."}, {"q": "A função =MÉDIA() calcula:", "opts": ["A soma de um intervalo", "A média de um intervalo de valores", "A contagem de células preenchidas"], "correct": 1, "exp": "A função =MÉDIA() calcula a média aritmética de um intervalo de valores."}, {"q": "A função =CONT.SE() serve para:", "opts": ["Contar células que atendem a um critério específico", "Somar todos os valores de uma planilha", "Buscar um valor em outra tabela"], "correct": 0, "exp": "=CONT.SE() conta quantas células atendem a um determinado critério definido."}, {"q": "A função =PROCV() é usada para:", "opts": ["Buscar um valor em uma tabela (busca vertical)", "Formatar células automaticamente", "Criar gráficos de pizza"], "correct": 0, "exp": "PROCV realiza uma busca vertical por um valor em uma tabela, retornando informações relacionadas."}, {"q": "Um gráfico de pizza é indicado para mostrar:", "opts": ["Proporções de um total", "Evolução ao longo do tempo", "Relação entre duas variáveis numéricas"], "correct": 0, "exp": "Gráficos de pizza mostram a proporção de cada parte em relação a um total."}, {"q": "Congelar painéis em uma planilha serve para:", "opts": ["Manter cabeçalhos visíveis ao rolar a planilha", "Impedir qualquer edição na planilha", "Apagar linhas automaticamente"], "correct": 0, "exp": "Congelar painéis mantém cabeçalhos ou colunas visíveis enquanto o restante é rolado."}, {"q": "A formatação condicional serve para:", "opts": ["Destacar dados visualmente com base em regras", "Apagar dados fora do padrão automaticamente", "Impedir a edição de células específicas"], "correct": 0, "exp": "Formatação condicional destaca visualmente células que atendem a certas condições."}, {"q": "Um filtro em uma planilha permite:", "opts": ["Visualizar apenas dados que atendem a certos critérios", "Apagar permanentemente os dados filtrados", "Impedir qualquer ordenação posterior"], "correct": 0, "exp": "Filtros permitem exibir apenas os dados que atendem a critérios específicos, sem apagá-los."}, {"q": "Classificar (ordenar) dados em uma planilha organiza:", "opts": ["Valores em ordem crescente ou decrescente", "Apenas as cores das células", "O tamanho da fonte utilizada"], "correct": 0, "exp": "A classificação organiza os valores de uma coluna em ordem crescente ou decrescente."}, {"q": "Uma célula com referência absoluta utiliza o símbolo:", "opts": ["%", "$", "#"], "correct": 1, "exp": "O símbolo $ fixa a referência de linha e/ou coluna em uma fórmula, tornando-a absoluta."}, {"q": "A função =SE() é utilizada para:", "opts": ["Realizar um teste lógico condicional", "Somar valores de uma coluna", "Contar o número de linhas preenchidas"], "correct": 0, "exp": "A função =SE() testa uma condição lógica e retorna um valor conforme o resultado ser verdadeiro ou falso."}, {"q": "A validação de dados em uma célula serve para:", "opts": ["Restringir os valores aceitos naquela célula", "Apagar automaticamente valores incorretos", "Formatar a célula com cores aleatórias"], "correct": 0, "exp": "Validação de dados restringe os tipos ou intervalos de valores aceitos em uma célula."}, {"q": "Um intervalo nomeado em uma planilha facilita:", "opts": ["Referenciar células por um nome, em vez do endereço", "Apagar dados de forma mais rápida", "Impedir qualquer tipo de fórmula"], "correct": 0, "exp": "Intervalos nomeados tornam fórmulas mais legíveis ao usar nomes em vez de endereços de células."}, {"q": "Um gráfico de linhas é indicado, principalmente, para:", "opts": ["Mostrar tendências ao longo do tempo", "Mostrar proporções de um total", "Comparar apenas dois valores isolados"], "correct": 0, "exp": "Gráficos de linhas são ideais para representar tendências e evolução ao longo do tempo."}, {"q": "As funções =MÁXIMO() e =MÍNIMO() retornam, respectivamente:", "opts": ["Os maiores e menores valores de um intervalo", "A soma e a média de um intervalo", "O número de células preenchidas e vazias"], "correct": 0, "exp": "=MÁXIMO() e =MÍNIMO() retornam o maior e o menor valor de um intervalo de dados."}, {"q": "Remover duplicatas em uma planilha serve para:", "opts": ["Eliminar registros repetidos", "Criar novas colunas automaticamente", "Aumentar o número de linhas da planilha"], "correct": 0, "exp": "A remoção de duplicatas elimina registros repetidos, mantendo a base de dados mais limpa."}, {"q": "Um dashboard em planilha eletrônica reúne:", "opts": ["Indicadores e gráficos em um só lugar", "Apenas dados brutos sem qualquer análise", "Textos longos sem nenhuma visualização"], "correct": 0, "exp": "Dashboards reúnem indicadores e gráficos de forma visual e organizada em um único painel."}, {"q": "A função =CONCATENAR() (ou o símbolo &) serve para:", "opts": ["Unir textos de diferentes células", "Separar textos em várias células", "Calcular a média de valores numéricos"], "correct": 0, "exp": "CONCATENAR (ou &) une o conteúdo de diferentes células em uma única célula de texto."}, {"q": "A proteção de uma planilha serve para:", "opts": ["Impedir alterações indesejadas nos dados", "Aumentar a velocidade de cálculo", "Apagar fórmulas automaticamente"], "correct": 0, "exp": "A proteção de planilha evita alterações acidentais ou indesejadas em dados e fórmulas."}, {"q": "O formato de célula 'porcentagem' exibe:", "opts": ["Valores multiplicados por 100, com o símbolo %", "Valores divididos por 1000", "Apenas números inteiros"], "correct": 0, "exp": "O formato de porcentagem multiplica o valor decimal por 100 e exibe com o símbolo %."}, {"q": "Formatar um intervalo como 'Tabela' no Excel facilita:", "opts": ["Filtros, ordenação e fórmulas automáticas", "Apenas a cor de fundo das células", "A exclusão definitiva de dados"], "correct": 0, "exp": "Tabelas formatadas facilitam filtros, ordenação e o uso de fórmulas estruturadas."}, {"q": "A segmentação de dados (slicers) em tabelas dinâmicas permite:", "opts": ["Filtrar interativamente os dados exibidos", "Apagar permanentemente os dados da tabela", "Impedir qualquer atualização da tabela"], "correct": 0, "exp": "Slicers permitem filtrar de forma interativa e visual os dados de uma tabela dinâmica."}, {"q": "Consolidar dados de várias planilhas pode ser feito com:", "opts": ["Fórmulas ou ferramentas como o Power Query", "Apenas copiando e colando manualmente sempre", "Formatação condicional exclusivamente"], "correct": 0, "exp": "A consolidação de dados pode ser feita com fórmulas ou ferramentas como o Power Query."}, {"q": "O erro #DIV/0! em uma fórmula ocorre quando:", "opts": ["Há uma divisão por zero na fórmula", "O texto foi digitado incorretamente", "A célula está formatada como porcentagem"], "correct": 0, "exp": "O erro #DIV/0! aparece quando a fórmula tenta dividir um valor por zero."}, {"q": "Um gráfico de dispersão é usado, principalmente, para:", "opts": ["Mostrar a relação entre duas variáveis numéricas", "Mostrar apenas proporções de um total", "Exibir texto formatado"], "correct": 0, "exp": "Gráficos de dispersão mostram a relação e possível correlação entre duas variáveis numéricas."}, {"q": "Uma macro em planilhas serve para:", "opts": ["Automatizar tarefas repetitivas", "Apagar todas as fórmulas da planilha", "Impedir qualquer tipo de automação"], "correct": 0, "exp": "Macros automatizam sequências de tarefas repetitivas em uma planilha."}, {"q": "A função =CONT.NÚM() conta, especificamente:", "opts": ["Apenas células com valores numéricos", "Todas as células, inclusive vazias", "Apenas células com texto"], "correct": 0, "exp": "=CONT.NÚM() conta exclusivamente as células que contêm valores numéricos."}, {"q": "Importar dados externos para uma planilha permite:", "opts": ["Analisar dados de outras fontes diretamente na planilha", "Apagar automaticamente os dados originais", "Impedir qualquer atualização futura dos dados"], "correct": 0, "exp": "A importação de dados externos permite analisar informações de outras fontes na própria planilha."}, {"q": "Um relatório de planilha bem estruturado facilita, principalmente:", "opts": ["A tomada de decisão baseada em dados", "O aumento do número de erros", "A dificuldade de leitura das informações"], "correct": 0, "exp": "Relatórios bem estruturados facilitam a tomada de decisão a partir de dados organizados."}, {"q": "A função =SEERRO() em uma planilha eletrônica serve para:", "opts": ["Tratar e substituir mensagens de erro por um valor definido", "Somar apenas valores que contenham erro", "Formatar automaticamente células com erro em vermelho"], "correct": 0, "exp": "A função =SEERRO() permite substituir mensagens de erro por um valor ou texto definido pelo usuário."}, {"q": "Um gráfico combinado (combo chart) em uma planilha permite:", "opts": ["Exibir diferentes tipos de gráfico em uma mesma visualização", "Exibir apenas um único tipo de gráfico por vez", "Substituir totalmente a necessidade de tabelas de dados"], "correct": 0, "exp": "Gráficos combinados exibem, por exemplo, barras e linhas juntas na mesma visualização, comparando diferentes métricas."}, {"q": "A ferramenta Power Query, em planilhas eletrônicas, é utilizada, principalmente, para:", "opts": ["Conectar, transformar e combinar dados de diferentes fontes", "Formatar apenas a aparência visual das células", "Substituir totalmente a necessidade de fórmulas simples"], "correct": 0, "exp": "Power Query conecta, transforma e combina dados de diferentes fontes antes de serem analisados na planilha."}]}];
+
+// ---------- STATE ----------
+let MODULES = [];
+let state = {};
+let PLAYER_NAME = '';
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function newSession(){
+  MODULES = MODULE_BANK.map(m=>{
+    const picked = shuffle(m.questions).slice(0, Math.min(QUESTIONS_PER_SESSION, m.questions.length));
+    return { id:m.id, track:m.track, name:m.name, hours:m.hours, questions:picked };
+  });
+  const totalQuestions = MODULES.reduce((a,m)=>a+m.questions.length,0);
+  state = {
+    completed:{}, score:0, streak:0, totalQuestions,
+    current:null, qIndex:0, answeredCurrent:false, moduleCorrect:0,
+    badges:{},
+  };
+  renderRewards();
+}
+
+function getTier(pct){
+  if(pct === 100) return { key:'ouro', icon:'🏆', label:'Ouro' };
+  if(pct >= 80) return { key:'prata', icon:'🥈', label:'Prata' };
+  if(pct >= 50) return { key:'bronze', icon:'🥉', label:'Bronze' };
+  return { key:'participacao', icon:'🎖️', label:'Participação' };
+}
+
+function renderRewards(){
+  const strip = document.getElementById('rewardsStrip');
+  if(!strip) return;
+  strip.innerHTML = MODULES.map(m=>{
+    const badge = state.badges[m.id];
+    if(badge){
+      return `<div class="reward-slot earned tier-${badge.key}" title="${m.name} — ${badge.label}">${badge.icon}</div>`;
+    }
+    return `<div class="reward-slot locked" title="${m.name} — bloqueada">?</div>`;
+  }).join('');
+}
+
+// ---------- BOOT SEQUENCE ----------
+const BOOT_STEPS = [
+  "Inicializando sistema SENAI",
+  "Carregando TRILHA_CONHECIMENTO.SYS",
+  "12 módulos detectados",
+  "Banco de questões: 400 itens carregados",
+  "Sorteando perguntas da missão",
+  "Integridade do sistema: 100%",
+  "Status: pronto para missão"
+];
+
+function generateParticles(){
+  const wrap = document.getElementById('coverParticles');
+  if(!wrap) return;
+  const colors = ['', 'violet', 'amber'];
+  const count = 22;
+  let html = '';
+  for(let i=0;i<count;i++){
+    const left = (Math.random()*100).toFixed(1);
+    const duration = (7 + Math.random()*8).toFixed(1);
+    const delay = (Math.random()*10).toFixed(1);
+    const size = (2 + Math.random()*2.5).toFixed(1);
+    const cls = colors[Math.floor(Math.random()*colors.length)];
+    html += `<span class="particle ${cls}" style="left:${left}%; width:${size}px; height:${size}px; animation-duration:${duration}s; animation-delay:${delay}s;"></span>`;
+  }
+  wrap.innerHTML = html;
+}
+
+function runBoot(){
+  const wrap = document.getElementById('bootSteps');
+  const bar = document.getElementById('bootProgressBar');
+  const pct = document.getElementById('bootProgressPct');
+  wrap.innerHTML = '';
+
+  const chips = BOOT_STEPS.map(()=>{
+    const chip = document.createElement('div');
+    chip.className = 'boot-step';
+    chip.innerHTML = `<span class="icon-slot"><span class="boot-spin"></span><span class="boot-check" style="display:none">✓</span></span><span class="boot-step-label"></span>`;
+    wrap.appendChild(chip);
+    return chip;
+  });
+
+  let i = 0;
+  function showStep(){
+    if(i >= BOOT_STEPS.length){
+      document.getElementById('bootEnter').style.display='inline-flex';
+      return;
+    }
+    const chip = chips[i];
+    chip.querySelector('.boot-step-label').textContent = BOOT_STEPS[i];
+    requestAnimationFrame(()=>{
+      chip.classList.add('show','active');
+    });
+    const pctVal = Math.round(((i)/BOOT_STEPS.length)*100);
+    bar.style.width = pctVal + '%';
+    pct.textContent = pctVal + '%';
+
+    setTimeout(()=>{
+      chip.classList.remove('active');
+      chip.classList.add('done');
+      chip.querySelector('.boot-spin').style.display='none';
+      chip.querySelector('.boot-check').style.display='inline';
+      const pctVal2 = Math.round(((i+1)/BOOT_STEPS.length)*100);
+      bar.style.width = pctVal2 + '%';
+      pct.textContent = pctVal2 + '%';
+      i++;
+      setTimeout(showStep, 140);
+    }, 420);
+  }
+  showStep();
+}
+
+function showCover(){
+  document.getElementById('bootTerminal').style.display = 'none';
+  document.getElementById('coverPanel').style.display = 'block';
+}
+
+function dismissBoot(){
+  const ov = document.getElementById('bootOverlay');
+  ov.classList.add('hide');
+  setTimeout(()=>{ ov.style.display='none'; }, 500);
+}
+
+function clearNameError(){
+  document.getElementById('nameError').style.display = 'none';
+  document.getElementById('playerNameInput').classList.remove('input-error');
+}
+
+function startMission(){
+  const input = document.getElementById('playerNameInput');
+  const name = input.value.trim();
+  if(!name){
+    document.getElementById('nameError').style.display = 'block';
+    input.classList.add('input-error');
+    input.focus();
+    return;
+  }
+  PLAYER_NAME = name;
+  const display = document.getElementById('playerNameDisplay');
+  if(display) display.textContent = PLAYER_NAME;
+  dismissBoot();
+}
+
+// ---------- BOARD GEOMETRY (3 cols x 5 rows snake) ----------
+const COLS = 3, ROWS = 4;
+const CELL_W = 220, CELL_H = 205, PAD_X = 90, PAD_Y = 70;
+const HEX_R = 34;
+function nodePos(index){
+  const row = Math.floor(index / COLS);
+  let col = index % COLS;
+  if (row % 2 === 1) col = COLS - 1 - col;
+  return { x: PAD_X + col*CELL_W, y: PAD_Y + row*CELL_H };
+}
+function hexPoints(r){
+  const pts = [];
+  for(let i=0;i<6;i++){
+    const angle = Math.PI/180 * (60*i - 90);
+    pts.push((r*Math.cos(angle)).toFixed(1) + ',' + (r*Math.sin(angle)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+
+function ensureDefs(svg){
+  const ns = 'http://www.w3.org/2000/svg';
+  const defs = document.createElementNS(ns,'defs');
+  defs.innerHTML = `
+    <filter id="neonGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neonGlowStrong" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  `;
+  svg.appendChild(defs);
+}
+
+function buildBoard(){
+  const svg = document.getElementById('board');
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  ensureDefs(svg);
+
+  for(let i=0;i<MODULES.length-1;i++){
+    const a = nodePos(i), b = nodePos(i+1);
+    const path = document.createElementNS(ns,'path');
+    let d;
+    if(a.y === b.y){
+      d = `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+    } else {
+      const midY = (a.y+b.y)/2;
+      d = `M ${a.x} ${a.y} L ${a.x} ${midY} L ${b.x} ${midY} L ${b.x} ${b.y}`;
+    }
+    path.setAttribute('d', d);
+    path.setAttribute('class','trace');
+    svg.appendChild(path);
+
+    const doneP = document.createElementNS(ns,'path');
+    doneP.setAttribute('d', d);
+    doneP.setAttribute('class','trace-done');
+    doneP.setAttribute('id','tracedone-'+i);
+    const len = doneP.getTotalLength ? doneP.getTotalLength() : 300;
+    doneP.setAttribute('stroke-dasharray', len);
+    doneP.setAttribute('stroke-dashoffset', len);
+    svg.appendChild(doneP);
+  }
+
+  MODULES.forEach((m, i)=>{
+    const p = nodePos(i);
+    const g = document.createElementNS(ns,'g');
+    g.setAttribute('class','node-group');
+    g.setAttribute('id','node-'+m.id);
+    g.setAttribute('transform', `translate(${p.x},${p.y})`);
+    g.onclick = ()=>tryOpenModule(m.id);
+
+    const hex = document.createElementNS(ns,'polygon');
+    hex.setAttribute('points', hexPoints(HEX_R));
+    hex.setAttribute('class','node-hex');
+    hex.setAttribute('id','hex-'+m.id);
+    g.appendChild(hex);
+
+    const num = document.createElementNS(ns,'text');
+    num.setAttribute('class','node-num');
+    num.setAttribute('id','num-'+m.id);
+    num.setAttribute('text-anchor','middle');
+    num.setAttribute('dy','5.5');
+    num.textContent = String(m.id).padStart(2,'0');
+    g.appendChild(num);
+
+    const label = document.createElementNS(ns,'text');
+    label.setAttribute('class','node-label');
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('y', 54);
+    wrapText(label, m.name, 24);
+    g.appendChild(label);
+
+    const sub = document.createElementNS(ns,'text');
+    sub.setAttribute('class','node-sub');
+    sub.setAttribute('text-anchor','middle');
+    sub.setAttribute('y', label.childNodes.length*13 + 60);
+    sub.textContent = 'CH ' + m.hours + 'h';
+    g.appendChild(sub);
+
+    svg.appendChild(g);
+  });
+
+  refreshBoard();
+}
+
+function wrapText(textEl, str, maxChars){
+  const words = str.split(' ');
+  let line = '';
+  let lines = [];
+  words.forEach(w=>{
+    if((line+' '+w).trim().length > maxChars){ lines.push(line.trim()); line = w; }
+    else { line = (line+' '+w).trim(); }
+  });
+  if(line) lines.push(line.trim());
+  const ns='http://www.w3.org/2000/svg';
+  lines.forEach((l,idx)=>{
+    const tspan = document.createElementNS(ns,'tspan');
+    tspan.setAttribute('x', 0);
+    tspan.setAttribute('dy', idx===0? 0 : 13);
+    tspan.textContent = l;
+    textEl.appendChild(tspan);
+  });
+}
+
+function isUnlocked(id){
+  if(id === 1) return true;
+  return !!state.completed[id-1];
+}
+
+function currentRank(){
+  const completedCount = Object.keys(state.completed).length;
+  const idx = Math.min(RANKS.length-1, Math.floor(completedCount / 3));
+  return RANKS[idx];
+}
+
+function refreshBoard(){
+  MODULES.forEach((m,i)=>{
+    const g = document.getElementById('node-'+m.id);
+    const hex = document.getElementById('hex-'+m.id);
+    const num = document.getElementById('num-'+m.id);
+    const trackHex = TRACKS[m.track].hex;
+    const done = !!state.completed[m.id];
+    const unlocked = isUnlocked(m.id);
+
+    hex.classList.remove('done','unlocked');
+    if(done){
+      hex.setAttribute('fill', trackHex);
+      hex.setAttribute('stroke', trackHex);
+      hex.classList.add('done');
+      num.textContent = '✓';
+      num.setAttribute('fill', '#04121e');
+      g.classList.remove('locked');
+    } else if(unlocked){
+      hex.setAttribute('fill', '#0a1e30');
+      hex.setAttribute('stroke', trackHex);
+      hex.classList.add('unlocked');
+      num.textContent = String(m.id).padStart(2,'0');
+      num.setAttribute('fill', trackHex);
+      g.classList.remove('locked');
+    } else {
+      hex.setAttribute('fill', '#071420');
+      hex.setAttribute('stroke', '#1c3c58');
+      num.textContent = String(m.id).padStart(2,'0');
+      num.setAttribute('fill', '#3c5a72');
+      g.classList.add('locked');
+    }
+
+    if(i < MODULES.length-1){
+      const doneP = document.getElementById('tracedone-'+i);
+      const thisDone = !!state.completed[m.id];
+      const len = doneP.getTotalLength ? doneP.getTotalLength() : 300;
+      doneP.setAttribute('stroke-dasharray', len);
+      doneP.setAttribute('stroke-dashoffset', thisDone ? 0 : len);
+    }
+  });
+
+  const completedCount = Object.keys(state.completed).length;
+  document.getElementById('statNodes').textContent = completedCount + ' / ' + MODULES.length;
+  document.getElementById('barNodes').style.width = (completedCount/MODULES.length*100)+'%';
+  document.getElementById('statScore').textContent = state.score + ' / ' + state.totalQuestions;
+  document.getElementById('barScore').style.width = (state.score/state.totalQuestions*100)+'%';
+  document.getElementById('statStreak').textContent = state.streak + ' 🔥';
+  document.getElementById('rankBadge').textContent = currentRank();
+
+  if(completedCount === MODULES.length){
+    showFinal();
+  }
+}
+
+function tryOpenModule(id){
+  if(state.completed[id]) return;
+  if(!isUnlocked(id)) return;
+  state.current = id;
+  state.qIndex = 0;
+  state.moduleCorrect = 0;
+  openQuestion();
+}
+
+function currentModule(){ return MODULES.find(m=>m.id===state.current); }
+
+function openQuestion(){
+  const m = currentModule();
+  const q = m.questions[state.qIndex];
+  state.answeredCurrent = false;
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <div class="m-eyebrow">// ${TRACKS[m.track].label} · CHECKPOINT ${String(m.id).padStart(2,'0')}</div>
+    <h2>${m.name}</h2>
+    <div class="qcount">QUERY ${state.qIndex+1}/${m.questions.length}</div>
+    <p style="font-size:15px; line-height:1.5; margin-bottom:16px;">${q.q}</p>
+    <div class="options" id="optionsWrap">
+      ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}" onclick="answer(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="modal-actions">
+      <button class="btn" id="nextBtn" disabled onclick="nextStep()">Continuar</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function answer(i){
+  if(state.answeredCurrent) return;
+  state.answeredCurrent = true;
+  const m = currentModule();
+  const q = m.questions[state.qIndex];
+  const buttons = document.querySelectorAll('#optionsWrap .opt');
+  buttons.forEach((b,idx)=>{
+    b.disabled = true;
+    if(idx === q.correct) b.classList.add('correct');
+    else if(idx === i) b.classList.add('wrong');
+  });
+  const feedback = document.getElementById('feedback');
+  if(i === q.correct){
+    state.score++;
+    state.streak++;
+    state.moduleCorrect++;
+    feedback.innerHTML = `<b style="color:var(--ok)">✔ CORRETO.</b> ${q.exp}`;
+  } else {
+    state.streak = 0;
+    feedback.innerHTML = `<b style="color:var(--bad)">✘ ERRO.</b> ${q.exp}`;
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep(){
+  const m = currentModule();
+  if(state.qIndex < m.questions.length - 1){
+    state.qIndex++;
+    openQuestion();
+  } else {
+    state.completed[m.id] = true;
+    showModuleComplete(m);
+  }
+}
+
+function showModuleComplete(m){
+  const modal = document.getElementById('modal');
+  const pct = Math.round(state.moduleCorrect / m.questions.length * 100);
+  const tier = getTier(pct);
+  state.badges[m.id] = tier;
+  modal.innerHTML = `
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <div class="complete-card">
+      <div class="icon">${tier.icon}</div>
+      <h2>CHECKPOINT LIBERADO</h2>
+      <p>${m.name} — ${state.moduleCorrect}/${m.questions.length} acertos (${pct}%)</p>
+      <p style="color:var(--amber); font-family:var(--font-head); font-weight:700; margin-top:-8px; margin-bottom:20px;">Recompensa: Medalha de ${tier.label} ${tier.icon}</p>
+      <button class="btn" onclick="closeModal()">Voltar à trilha</button>
+    </div>
+  `;
+  renderRewards();
+  refreshBoard();
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+  refreshBoard();
+}
+
+function showFinal(){
+  const pct = state.score / state.totalQuestions;
+  let rank, text;
+  if(pct >= 0.91){ rank = 'ANALISTA SÊNIOR — DESTAQUE'; text = 'Revisão geral concluída com excelência! Você dominou os fundamentos das três trilhas: Educação para o Trabalho, Operador de Computador e Assistente de Análise de Dados.'; }
+  else if(pct >= 0.71){ rank = 'ANALISTA PLENO'; text = 'Missão cumprida com ótimo desempenho. Rode a trilha de novo pra pegar um novo set de perguntas e tentar o rank máximo.'; }
+  else if(pct >= 0.41){ rank = 'OPERADOR EM FORMAÇÃO'; text = 'Trilha concluída, mas o sistema aponta pontos fracos. Revise os módulos técnicos e tente novamente.'; }
+  else { rank = 'RECRUTA'; text = 'Primeira execução completa. Revise o conteúdo das disciplinas e rode a missão de novo para subir de patente.'; }
+
+  const encouragements = [
+    'Cada pergunta respondida é um passo a mais na sua formação. Continue estudando e evoluindo! 🚀',
+    'Revisar é construir uma base sólida. Você está cada vez mais preparado para os desafios reais! 💡',
+    'O conhecimento que você reforçou hoje vai fazer diferença amanhã. Siga em frente! ⭐',
+    'Persistência é o que separa quem aprende de quem domina. Parabéns pela dedicação! 🔥'
+  ];
+  const encourage = encouragements[Math.floor(Math.random() * encouragements.length)];
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  document.getElementById('finalScore').textContent = state.score + '/' + state.totalQuestions;
+  document.getElementById('finalRank').textContent = rank;
+  document.getElementById('finalText').textContent = text;
+  document.getElementById('certPlayerName').textContent = PLAYER_NAME || '—';
+
+  const counts = { ouro:0, prata:0, bronze:0, participacao:0 };
+  Object.values(state.badges).forEach(b => { counts[b.key] = (counts[b.key]||0) + 1; });
+  const badgesHtml = [
+    counts.ouro ? `<span>🏆 x${counts.ouro}</span>` : '',
+    counts.prata ? `<span>🥈 x${counts.prata}</span>` : '',
+    counts.bronze ? `<span>🥉 x${counts.bronze}</span>` : '',
+    counts.participacao ? `<span>🎖️ x${counts.participacao}</span>` : '',
+  ].filter(Boolean).join('');
+  document.getElementById('certBadges').innerHTML = badgesHtml;
+
+  document.getElementById('certEncourage').textContent = encourage;
+  document.getElementById('certDate').textContent = 'Concluído em ' + dateStr;
+  document.getElementById('finalCard').classList.add('show');
+  document.getElementById('finalCard').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function resetGame(){
+  document.getElementById('finalCard').classList.remove('show');
+  newSession();
+  buildBoard();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+newSession();
+buildBoard();
+generateParticles();
+runBoot();
+</script>
+</body>
+</html>
